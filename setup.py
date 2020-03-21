@@ -1,6 +1,6 @@
 #!/bin/env python3
 
-version="0.0.1"
+version="0.0.3"
 
 import os
 # os.system('rm -rf *.egg-info/')        # Make 'really clean'
@@ -48,7 +48,7 @@ os.system('mv -f .git_temp .git')
 
 # Do some basic checks:
 print("\nPython source files included in tarball:")
-os.system('tar tfz dist/solarenergy-'+version+'.tar.gz |grep -E "\.py"')
+os.system('tar tfz dist/solarenergy-'+version+r'.tar.gz |grep -E "\.py"')
 print()
 
 os.system('twine check dist/solarenergy-'+version+'.tar.gz')
