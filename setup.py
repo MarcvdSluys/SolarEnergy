@@ -1,6 +1,6 @@
 #!/bin/env python3
 
-version="0.0.3"
+version="0.0.4"
 
 import os
 # os.system('rm -rf *.egg-info/')        # Make 'really clean'

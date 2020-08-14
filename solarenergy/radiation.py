@@ -89,7 +89,7 @@ def computeSunPos(lon,lat, year,month,day, hour,minute=0,second=0, timezone='UTC
 
 
 
-def angleSunPanels(spAz,spIncl, sunAz,sunAlt):
+def cosAngleSunPanels(spAz,spIncl, sunAz,sunAlt):
     """Compute the cosine of the angle between the orientation vector of the solar panels and the position vector
        of the Sun.
     

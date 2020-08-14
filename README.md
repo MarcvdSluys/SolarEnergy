@@ -26,8 +26,8 @@ geoLon =  5*d2r  # Geographic longitude (>0 for eastern hemisphere; ° -> rad)
 geoLat = 52*d2r  # Geographic latitude  (>0 for northern hemisphere; ° -> rad)
 
 # Orientation of my solar panels:
-spAz   = -2*d2r    # Azimuth ('wind direction') of my panels are facing.  Note: South=0, W=90° (pi/2 rad) in the northern hemisphere!  (rad)
-spIncl = 28*d2r    # Inclination of my panels w.r.t. the horizontal  (rad)
+spAz   = -2*d2r  # Azimuth ('wind direction') of my panels are facing.  Note: South=0, W=90° (pi/2 rad) in the northern hemisphere!  (rad)
+spIncl = 28*d2r  # Inclination of my panels w.r.t. the horizontal  (rad)
 
 # An hour past noon local time on 1 March 2020:
 myTZ  = 'Europe/Amsterdam'
@@ -39,13 +39,13 @@ hour  = 13
 # Compute Sun position (uses SolTrack behind the scenes):
 sunAz,sunAlt,sunDist = se.computeSunPos(geoLon,geoLat, year,month,day, hour, timezone=myTZ)
 
-AM        = se.airmass(sunAlt)                            # Air mass for this Sun altitude
-extFac    = se.extintionFactor(AM)                        # Extinction factor at sea level for this airmass
-cosTheta  = se.angleSunPanels(spAz,spIncl, sunAz,sunAlt)  # cos of the angle with which Sun hits my panels
+AM        = se.airmass(sunAlt)                               # Air mass for this Sun altitude
+extFac    = se.extintionFactor(AM)                           # Extinction factor at sea level for this airmass
+cosTheta  = se.cosAngleSunPanels(spAz,spIncl, sunAz,sunAlt)  # cos of the angle with which Sun hits my panels
 
-solConst  = 1361.5 / sunDist**2                           # Solar constant, scaled with solar distance
-DNI       = solConst / extFac                             # DNI for a clear sky
-dirRad    = DNI * cosTheta                                # Insolation of direct sunlight on my panels
+solConst  = 1361.5 / sunDist**2                              # Solar constant, scaled with solar distance
+DNI       = solConst / extFac                                # DNI for a clear sky
+dirRad    = DNI * cosTheta                                   # Insolation of direct sunlight on my panels
 
 
 # Print input and output:
