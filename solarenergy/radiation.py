@@ -1,7 +1,7 @@
 #  Copyright (c) 2020  Marc van der Sluys - marc.vandersluys.nl
 #  
-#  This file is part of the SolarEnergy Python package, containing a Python module do simple modelling in the field of
-#  solar energy.  See: https://github.com/MarcvdSluys/SolarEnergy
+#  This file is part of the SolarEnergy Python package, containing a Python module to do simple modelling in
+#  the field of solar energy.  See: https://github.com/MarcvdSluys/SolarEnergy
 #  
 #  This is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License
 #  as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.

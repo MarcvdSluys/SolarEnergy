@@ -1,8 +1,8 @@
 # SolarEnergy #
 
-A Python module do simple modelling in the field of solar energy.  The code is being developped by Marc van
-der Sluys of the department of Sustainable energy of the HAN University of Applied Sciences in Arnhem, the
-Netherlands.
+A Python module to do simple modelling in the field of solar energy.  The code is being developped by [Marc
+van der Sluys](http://han.vandersluys.nl/en/) of the department of Sustainable energy of the HAN University of
+Applied Sciences in Arnhem, the Netherlands.
 
 
 ## Installation ##
