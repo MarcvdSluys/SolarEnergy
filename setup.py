@@ -1,6 +1,6 @@
 #!/bin/env python3
 
-version="0.0.4"
+version="0.0.5"
 
 import os
 # os.system('rm -rf *.egg-info/')        # Make 'really clean'
@@ -20,7 +20,7 @@ setup(
     url='https://github.com/MarcvdSluys/SolarEnergy',
     
     packages=['solarenergy'],
-    install_requires=['sys','datetime','pytz','numpy','soltrack'],
+    install_requires=['pytz','numpy','soltrack'],
     long_description=long_description,
     long_description_content_type='text/markdown',
     
