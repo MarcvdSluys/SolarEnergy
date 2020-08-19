@@ -135,7 +135,7 @@ def airmass(sunAlt):
 
 
 
-def extintionFactor(airmass):
+def extinctionFactor(airmass):
     """Compute the atmospheric extinction factor for sunlight from the air mass.
     
     Args:

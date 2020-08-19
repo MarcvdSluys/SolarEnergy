@@ -40,7 +40,7 @@ hour  = 13
 sunAz,sunAlt,sunDist = se.computeSunPos(geoLon,geoLat, year,month,day, hour, timezone=myTZ)
 
 AM        = se.airmass(sunAlt)                               # Air mass for this Sun altitude
-extFac    = se.extintionFactor(AM)                           # Extinction factor at sea level for this airmass
+extFac    = se.extinctionFactor(AM)                          # Extinction factor at sea level for this airmass
 cosTheta  = se.cosAngleSunPanels(spAz,spIncl, sunAz,sunAlt)  # cos of the angle with which Sun hits my panels
 
 solConst  = 1361.5 / sunDist**2                              # Solar constant, scaled with solar distance
