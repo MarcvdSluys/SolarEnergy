@@ -7,9 +7,9 @@ Applied Sciences in Arnhem, the Netherlands.
 
 ## Installation ##
 
-This package can be installed using `pip install solarenergy`.  This should automatically install the dependency
-packages `sys`, `datetime`, `pytz`, `numpy` and `soltrack` if they haven't been installed already.
-If you are installing by hand, ensure that these packages are installed as well.
+This package can be installed using `pip install solarenergy`.  This should automatically install the
+dependency packages `pytz`, `numpy` and `soltrack` if they haven't been installed already.  If you are
+installing by hand, ensure that these packages are installed as well.
 
 
 ## Example use ##
