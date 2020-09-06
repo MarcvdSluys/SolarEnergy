@@ -104,20 +104,24 @@ def cosAngleSunPanels(spAz,spIncl, sunAz,sunAlt):
     
     Returns:
         float:  The cosine between the normal vector of the solar panels and the position vector of the Sun (rad).
+                Note that this value is zero (indicating radiation from behind the panels) or positive.
 
     """
     
     cosTheta = np.sin(sunAlt) * np.cos(spIncl)  +  np.cos(sunAlt) * np.sin(spIncl) * np.cos(sunAz - spAz)
+    cosTheta = max(cosTheta, 0)  # Return 0 rather than negative values (indicating radiation from behind).
     
     return cosTheta
 
 
 
-def airmass(sunAlt):
+def airmass(sunAlt, returnValueBelowHorizon=False):
     """Compute airmass as a function of Sun altitude.
     
     Args:
         sunAlt (float):  Altitude of the Sun (rad).
+        returnValueBelowHorizon (bool): Return a very large value when the Sun is below the horizon, larger
+                                        when the Sun is lower.  This can be useful for solvers.  Default: False.
     
     Returns:
         float:  Airmass at sea level (AM~1 if the Sun is in the zenith, AM~38 near the horizon).
@@ -125,7 +129,10 @@ def airmass(sunAlt):
     """
     
     if(sunAlt < -0.00989):
-        airmass = 1000 * (0.15 + abs(sunAlt))  # Very bad, but still getting worse for lower Sun, for solvers
+        if(returnValueBelowHorizon):
+            airmass = 1000 * (0.15 + abs(sunAlt))  # Very bad, but still getting worse for lower Sun, for solvers
+        else:
+            airmass = float('inf')
     else:
         airmass = (1.002432*np.sin(sunAlt)**2 + 0.148386*np.sin(sunAlt) + 0.0096467) / \
                   (np.sin(sunAlt)**2*np.sin(sunAlt) + 0.149864*np.sin(sunAlt)**2 + 0.0102963*np.sin(sunAlt) + 0.000303978)
@@ -135,11 +142,13 @@ def airmass(sunAlt):
 
 
 
-def extinctionFactor(airmass):
+def extinctionFactor(airmass, returnValueBelowHorizon=False):
     """Compute the atmospheric extinction factor for sunlight from the air mass.
     
     Args:
         airmass (float):  Airmass at sea level (AM~1 if the Sun is in the zenith, AM~38 near the horizon).
+        returnValueBelowHorizon (bool): Return a very large value when the Sun is below the horizon, larger
+                                        when the Sun is lower.  This can be useful for solvers.  Default: False.
     
     Returns:
         float:  The extinciton factor for sunlight in the atmosphere.  Divide the solar constant by this number 
@@ -148,7 +157,10 @@ def extinctionFactor(airmass):
     """
     
     if(airmass > 38.2):
-        extFac = np.sqrt(sys.float_info.max) * (0.15 + airmass)  # Very bad, but still getting worse for higher airmass, for solvers
+        if(returnValueBelowHorizon):
+            extFac = np.sqrt(sys.float_info.max) * (0.15 + airmass)  # Very bad, but still getting worse for higher airmass, for solvers
+        else:
+            extFac = float('inf')
     else:
         coefs = [ 9.1619283e-2, 2.6098406e-1,-3.6487512e-2, 6.4036283e-3,-8.1993861e-4, 6.9994043e-5,-3.8980993e-6,
                   1.3929599e-7, -3.0685834e-9, 3.7844273e-11,-1.9955057e-13]
