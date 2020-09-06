@@ -97,9 +97,9 @@ def cosAngleSunPanels(spAz,spIncl, sunAz,sunAlt):
     the DNI to obtain the direct insolation on the panels.
     
     Args:
-        spAz (float):    Azimuth in which the solar panels are facing (rad; south = 0 on the northern hemisphere).
+        spAz (float):    Azimuth in which the solar panels are facing (rad; e.g. north or south = 0, same as sunAz).
         spIncl (float):  Inclination ('zenith angle') of the solar panels w.r.t. the horizontal (rad).
-        sunAz (float):   Azimuth of the Sun (rad; south = 0 on the northern hemisphere).
+        sunAz (float):   Azimuth of the Sun (rad; e.g. north or south = 0, same as spAz).
         sunAlt (float):  Altitude of the Sun (rad).
     
     Returns:

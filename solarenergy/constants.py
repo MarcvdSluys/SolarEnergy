@@ -1,8 +1,8 @@
 #  Copyright (c) 2020  Marc van der Sluys - marc.vandersluys.nl
-#   
+#  
 #  This file is part of the SolarEnergy Python package, containing a Python module to do simple modelling in
 #  the field of solar energy.  See: https://github.com/MarcvdSluys/SolarEnergy
-#   
+#  
 #  This is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License
 #  as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 #  
@@ -13,24 +13,12 @@
 #  <http://www.gnu.org/licenses/>.
 
 
-"""SolarEnergy module
-
-SolarEnergy contains a Python module to do simple modelling in the field of solar energy.  SolarEnergy can be
-used under the conditions of the GPLv3 licence.  These pages contain the API documentation.  For more
-information on the Python package, licence, source code and data files, see the [SolarEnergy GitHub
-page](https://github.com/MarcvdSluys/SolarEnergy).
-
-The SolarEnergy code is based on the [libTheSky](http://libthesky.sourceforge.net) Fortran library.
-Information on the theory behind this code can be found in the document
-[Celestial mechanics in a nutshell](https://cmians.sourceforge.io).
+"""Constants for solar energy.
 
 """
 
 
-name = "solarenergy"
+d2r = 0.01745329251994329576   # Degrees to radians conversion factor = pi/180
+r2d = 57.29577951308232087680  # Radians to degrees conversion factor = 180/pi
 
-from .constants import *
-from .radiation import *
-
-
-
+solConst = 1361.5  # Solar constant: ~1361-1362 W/m² - https://en.wikipedia.org/wiki/Solar_constant
