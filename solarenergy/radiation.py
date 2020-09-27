@@ -94,7 +94,8 @@ def cosAngleSunPanels(spAz,spIncl, sunAz,sunAlt):
        of the Sun.
     
     This is the cosine of the angle under which the direct sunlight hits the solar panels.  Multiply it with
-    the DNI to obtain the direct insolation on the panels.
+    the DNI to obtain the direct insolation on the panels.  See Celestial mechanics in a nutshell, Sect. 4.3:
+    Insolation on an inclined surface (http://CMiaNS.sf.net).
     
     Args:
         spAz (float):    Azimuth in which the solar panels are facing (rad; e.g. north or south = 0, same as sunAz).
