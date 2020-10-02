@@ -317,3 +317,97 @@ def diffuse_radiation_Perez87(DoY, alt, surfIncl, theta, Gbeam_n,Gdif_hor):
     return Gdif_inc
 
 
+
+def clearsky_bird(alt, Io=1353,Rsun=1, Press=1013,  Uo=0.34,Uw=1.42, Ta5=0.2661,Ta3=0.3538,Ba=0.84,K1=0.1, Rg=0.2):
+    
+    """A simplified clear-sky model for direct and diffuse insolation on horizontal surfaces.
+    
+    A.k.a. as "the Bird model".
+    
+    This function is adapted from the libTheSky Fortran implementation (libthesky.sf.net).
+    
+    See: Bird & Hulstrom, A simplified clear-sky model for direct and diffuse insolation on horizontal
+    surfaces, SERI/TR-642-761 (1981).
+    
+    Note that the value of Taa does not agree with tabulated values from the paper, and hence neither do
+    dependent values (except for AM~1).  When I substitute their values for Taa, everything matches perfectly.
+    Error in their formula, or (hopefully!) in their table?
+
+    Parameters:
+      alt Sun altitude above the horizon (rad)
+    
+      Io     Solar 'constant' (W/m^2 - optional, default: 1353 (1361.5))
+      Rsun   Sun distance (AU - optional, default: 1)
+      Press  Air pressure at the observer's site, corrected for altitude (hPa - optional, default: 1013)
+    
+      Uo     Ozone abundance in a vertical column (cm - optional, default: 0.34)
+      Uw     Percipitable water-vapor abundance in a vertical column (cm - optional, default: 1.42)
+    
+      Ta5    Aerosol optical depth from surface in vertical path at 500 nm (optional, default: 0.2661)
+      Ta3    Aerosol optical depth from surface in vertical path at 380 nm (optional, default: 0.3538)
+      Ba     Aerosol forward-scattering ratio  (optional, 0.82-0.86, default: 0.84)
+      K1     Aerosol-absorptance constant (optional, rural: 0.0933, urban: 0.385, default: 0.1)
+    
+      Rg     Ground albedo (optional, fraction - default: 0.2)
+    
+    
+    Returns: 
+      tuple (float,float,float,float):  Tuple containing (rv1, rv2):
+        
+      - Itot (float):  Total insolation on a horizontal surface (W/m^2)
+      - Idir (float):  Direct (beam) insolation on a horizontal surface (W/m^2)
+      - Idif (float):  Diffuse insolation on a horizontal surface (W/m^2)
+      - Igr  (float):  Ground-reflection insolation from a horizontal surface (W/m^2)
+
+    """
+    
+    from solarenergy.constants import pio2, r2d
+    
+    Z = pio2 - alt  # Solar zenith angle
+    cosZ = np.cos(Z)   # Save a few CPU cycles
+    
+    
+    # Relative air mass for the solar vector:
+    AM  = 1/(cosZ + 0.15 * (93.885-Z*r2d)**(-1.25))  # Air mass
+    AMp = AM * Press / 1013                          # Pressure-corrected air mass
+    
+    
+    # TRANSMISSION EQUATIONS:
+    # Rayleigh scattering:
+    Tr = np.exp( -0.0903 * AMp**0.84 * (1 + AMp - AMp**1.01) )
+    
+    # Ozone:
+    Xo = Uo*AM  # Amount of ozone in the direction of the Sun
+    To = 1  -  0.1611 * Xo * (1+139.48*Xo)**(-0.3035)  -  0.002715 * Xo / (1 + 0.044*Xo + 0.0003*Xo**2)  # Transmittance of ozone absorptance
+    
+    # Uniformly mixed gases (CO2, O2):
+    Tum = np.exp(-0.0127 * AMp**0.26)  # Transmittance of mixed-gas absorptance
+    
+    # Water vapor:
+    Xw = AM*Uw  # Amount of water vapor in the direction of the Sun
+    Tw = 1 - 2.4959 * Xw / ((1 + 79.034*Xw)**0.6828 + 6.385*Xw)             # Transmittance of water-vapor absorptance - Tw = 1-Aw
+    
+    # Daily turbidity:
+    Tau = 0.2758*Ta3 + 0.35*Ta5                                             # Broadband turbidity: aerosol optical depth from surface in a vertical column
+    Ta  = np.exp( -Tau**0.873  *  (1 + Tau - Tau**0.7088)  *  AM**0.9108 )  # Transmittance of aerosol absorptance and scattering
+    Taa = 1 - K1 * (1 - AM + AM**1.06) * (1-Ta)                             # Transmittance of aerosol absorptance - this does not agree with tabulated values from the paper (except for AM~1).  When I substitute their values for Taa, everything matches perfectly.  Error in their formula, or in their table?
+    Tas = Ta/Taa                                                            # Transmittance of aerosol scattering
+    Rs  = 0.0685 + (1-Ba) * (1-Tas)                                         # Sky albedo
+    
+    
+    # IRRADIANCE EQUATIONS:
+    # Direct radiation on a horizontal surface:
+    tmpVar = Io * cosZ  *  To * Tum * Tw  # Save a few CPU cycles
+    Idir = 0.9662 * tmpVar  *  Tr * Ta  /  Rsun**2
+    
+    # Diffuse (scattered) radiation on a horizontal surface:
+    Idif  = 0.79 *  tmpVar        * Taa *  (0.5*(1-Tr) + Ba*(1-Tas)) / (1 - AM + AM**1.02)
+    
+    # Total (direct+diffuse) radiation on a horizontal surface:
+    Itot = (Idir+Idif) / (1 - Rg*Rs)
+    
+    # Ground-reflected radiation from a horizontal surface:
+    Igr  = Itot - (Idir+Idif)
+    
+    return Itot, Idir, Idif, Igr
+
