@@ -18,7 +18,14 @@
 """
 
 
-d2r = 0.01745329251994329576   # Degrees to radians conversion factor = pi/180
-r2d = 57.29577951308232087680  # Radians to degrees conversion factor = 180/pi
+# Modules:
+import math as m
+
+pi   = m.pi;           """pi"""
+pi2  = 2*pi;           """2 pi"""
+pio2 = pi/2;           """pi/2"""
+
+r2d  = m.degrees(1);   """Radians to degrees"""
+d2r  = m.radians(1);   """Degrees to radians"""
 
 solConst = 1361.5  # Solar constant: ~1361-1362 W/m² - https://en.wikipedia.org/wiki/Solar_constant
