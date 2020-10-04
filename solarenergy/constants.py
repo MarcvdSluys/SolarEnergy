@@ -28,4 +28,7 @@ pio2 = pi/2;           """pi/2"""
 r2d  = m.degrees(1);   """Radians to degrees"""
 d2r  = m.radians(1);   """Degrees to radians"""
 
-solConst = 1361.5  # Solar constant: ~1361-1362 W/m² - https://en.wikipedia.org/wiki/Solar_constant
+solConst = 1361.5;     """Solar constant: ~1361-1362 W/m² - https://en.wikipedia.org/wiki/Solar_constant"""
+
+
+

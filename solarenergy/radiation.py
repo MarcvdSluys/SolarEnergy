@@ -151,10 +151,10 @@ def extinctionFactor(airmass, returnValueBelowHorizon=False):
         returnValueBelowHorizon (bool): Return a very large value when the Sun is below the horizon, larger
                                         when the Sun is lower.  This can be useful for solvers.  Default: False.
     
-    Returns:
-        float:  The extinciton factor for sunlight in the atmosphere.  Divide the solar constant by this number 
-                to obtain the DNI.
-    
+    Returns: 
+        float: The extinciton factor for sunlight in the atmosphere.  Divide the extraterrestrial (AM)
+               radiation (or, if unknown, solar constant) by this number to obtain the DNI.
+
     """
     
     if(airmass > 38.2):
@@ -177,7 +177,7 @@ def extinctionFactor(airmass, returnValueBelowHorizon=False):
     return extFac
 
 
-def diffuse_radiation_Perez87(DoY, alt, surfIncl, theta, Gbeam_n,Gdif_hor):
+def diffuse_radiation_projection_Perez87(DoY, alt, surfIncl, theta, Gbeam_n,Gdif_hor):
     
     """Compute diffuse radiation on an inclined surface using the 1987 Perez model
     
@@ -318,7 +318,7 @@ def diffuse_radiation_Perez87(DoY, alt, surfIncl, theta, Gbeam_n,Gdif_hor):
 
 
 
-def clearsky_bird(alt, Io=1353,Rsun=1, Press=1013,  Uo=0.34,Uw=1.42, Ta5=0.2661,Ta3=0.3538,Ba=0.84,K1=0.1, Rg=0.2):
+def clearsky_bird(alt, Iext=1353,Rsun=1, Press=1013,  Uo=0.34,Uw=1.42, Ta5=0.2661,Ta3=0.3538,Ba=0.84,K1=0.1, Rg=0.2):
     
     """A simplified clear-sky model for direct and diffuse insolation on horizontal surfaces.
     
@@ -326,7 +326,7 @@ def clearsky_bird(alt, Io=1353,Rsun=1, Press=1013,  Uo=0.34,Uw=1.42, Ta5=0.2661,
     
     This function is adapted from the libTheSky Fortran implementation (libthesky.sf.net).
     
-    See: Bird & Hulstrom, A simplified clear-sky model for direct and diffuse insolation on horizontal
+    See Bird & Hulstrom, A simplified clear-sky model for direct and diffuse insolation on horizontal
     surfaces, SERI/TR-642-761 (1981).
     
     Note that the value of Taa does not agree with tabulated values from the paper, and hence neither do
@@ -336,7 +336,7 @@ def clearsky_bird(alt, Io=1353,Rsun=1, Press=1013,  Uo=0.34,Uw=1.42, Ta5=0.2661,
     Parameters:
       alt Sun altitude above the horizon (rad)
     
-      Io     Solar 'constant' (W/m^2 - optional, default: 1353 (1361.5))
+      Iext   Extraterrestrial radiation (at the top of the atmosphere; AM0; W/m^2 - optional, default: 1353 (1361.5))
       Rsun   Sun distance (AU - optional, default: 1)
       Press  Air pressure at the observer's site, corrected for altitude (hPa - optional, default: 1013)
     
@@ -351,7 +351,7 @@ def clearsky_bird(alt, Io=1353,Rsun=1, Press=1013,  Uo=0.34,Uw=1.42, Ta5=0.2661,
       Rg     Ground albedo (optional, fraction - default: 0.2)
     
     
-    Returns: 
+    Returns:
       tuple (float,float,float,float):  Tuple containing (rv1, rv2):
         
       - Itot (float):  Total insolation on a horizontal surface (W/m^2)
@@ -397,7 +397,7 @@ def clearsky_bird(alt, Io=1353,Rsun=1, Press=1013,  Uo=0.34,Uw=1.42, Ta5=0.2661,
     
     # IRRADIANCE EQUATIONS:
     # Direct radiation on a horizontal surface:
-    tmpVar = Io * cosZ  *  To * Tum * Tw  # Save a few CPU cycles
+    tmpVar = Iext * cosZ  *  To * Tum * Tw  # Save a few CPU cycles
     Idir = 0.9662 * tmpVar  *  Tr * Ta  /  Rsun**2
     
     # Diffuse (scattered) radiation on a horizontal surface:
@@ -411,3 +411,25 @@ def clearsky_bird(alt, Io=1353,Rsun=1, Press=1013,  Uo=0.34,Uw=1.42, Ta5=0.2661,
     
     return Itot, Idir, Idif, Igr
 
+
+def diffuseRad_from_globalRad_sunshine(Gglob_hor, sunFrac, sunAlt, Iext):
+    """Compute the diffuse horizontal radiation from the global horizontal radiation and the Sun altitude.
+    
+    Parameters:
+      Gglob_hor (float):  Global horizontal radiation (W/m2).
+      sunFrac   (float):  Fraction of sunshine (e.g. fraction of cloud cover) (-; 0-1).
+      sunAlt    (float):  Sun altitude above the horizon (rad).
+    
+    Returns:
+      tuple (float,float,float):  Tuple containing (Gdif_hor, Gbeam_hor, DNI):
+      
+        - Gdif_hor  (float):  Diffuse horizontal radiation (W/m2).
+        - Gbeam_hor (float):  Beam (direct) horizontal radiation (W/m2).
+        - DNI       (float):  DNI = direct (beam) normal irradiation (W/m2).
+    """
+    
+    DNI = Iext / extinctionFactor(airmass(sunAlt)) * sunFrac  # (Mean) DNI
+    Gbeam_hor = DNI*np.sin(sunAlt)
+    Gdif_hor  = Gglob_hor - Gbeam_hor
+    
+    return Gdif_hor, Gbeam_hor, DNI
