@@ -4,7 +4,7 @@
 
 
 # Package version:
-version="0.0.10"
+version="0.0.11"
 
 # Get long description from README.md:
 with open("README.md", "r") as fh:
