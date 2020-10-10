@@ -75,6 +75,7 @@ print()
 
 * [Pypi](https://pypi.org/project/solarenergy/): SolarEnergy Python package
 * [GitHub](https://github.com/MarcvdSluys/SolarEnergy): SolarEnergy source code
+* [ReadTheDocs](https://solarenergy.readthedocs.io): SolarEnergy documentation
 
 
 ## Author and licence ##
