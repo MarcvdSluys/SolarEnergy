@@ -4,7 +4,7 @@
 
 
 # Package version:
-version="0.0.14"
+version="0.0.15"
 
 # Get long description from README.md:
 with open("README.md", "r") as fh:
@@ -19,7 +19,7 @@ setup(
     url='https://github.com/MarcvdSluys/SolarEnergy',
     
     packages=['solarenergy'],
-    install_requires=['pytz','numpy','soltrack'],
+    install_requires=['pytz','numpy','soltrack>=0.1.0'],
     long_description=long_description,
     long_description_content_type='text/markdown',
     
