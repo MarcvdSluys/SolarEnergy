@@ -26,24 +26,24 @@ import datetime as dt
 import pytz as tz
 import numpy as np
 
-import soltrack as st
+from soltrack import SolTrack
 
 
-def computeSunPos(lon,lat, year,month,day, hour,minute=0,second=0, timezone='UTC', debug=False):
+def computeSunPos(geoLon,geoLat, year,month,day, hour,minute=0,second=0, timezone='UTC', debug=False):
     """Compute the Sun local position (azimuth, altitude and distance) for the given geographical location and
     date and time using SolTrack.
     
     Args:
-        lon (float):  Geographic longitude to compute the Sun position for (rad).
-        lat (float):  Geographic latitude to compute the Sun position for (rad).
+        geoLon (float):  Geographic longitude to compute the Sun position for (rad).
+        geoLat (float):  Geographic latitude to compute the Sun position for (rad).
     
-        year (int):    Year (CE) to compute the Sun position for.
-        month (int):   Month to compute the Sun position for.
-        day (int):     Day of month to compute the Sun position for.
+        year (int):      Year (CE) to compute the Sun position for.
+        month (int):     Month to compute the Sun position for.
+        day (int):       Day of month to compute the Sun position for.
     
-        hour (int):    Hour of day to compute the Sun position for (local time!).
-        minute (int):  Minute to compute the Sun position for (optional; default = 0).
-        second (int):  Second to compute the Sun position for (optional; default = 0).
+        hour (int):      Hour of day to compute the Sun position for (local time!).
+        minute (int):    Minute to compute the Sun position for (optional; default = 0).
+        second (int):    Second to compute the Sun position for (optional; default = 0).
     
         timezone (timezone):  Time zone for which date and time are provided (optional; default = 'UTC').
     
@@ -63,29 +63,24 @@ def computeSunPos(lon,lat, year,month,day, hour,minute=0,second=0, timezone='UTC
     lt = myTZ.localize(myTime, is_dst=None)  # Mark as local time
     utc = lt.astimezone(tz.utc)              # Convert to UTC
     
-    # Set up geographical location (in degrees, since useDegrees=True) in a SolTrack Location dataclass object:
-    loc = st.Location(lon,lat)  # longitude (>0: east of Greenwich),  latitude (>0: northern hemisphere), in radians
+    # Create a SolTrack instance for the desired location and specify preferences:
+    st = SolTrack(geoLon,geoLat, computeRefrEquatorial=False)  # No need for equatorial coordinates
+    st.setDateTime(utc)   # Set the date and time:
+    st.computePosition()  # Compute the Sun's position
     
-    # Set (UT!) date and time in a SolTrack Time dataclass object:
-    time = st.Time.datetime2st(utc)
-    
-    # Compute positions - returns a st.Position object:
-    pos = st.computeSunPosition(loc, time, computeDistance=True)
-    
-    # Write results to standard output:
     if(debug):
         r2d = 180/np.pi  # Convert radians to degrees
-        print("Location:  %0.3lf E, %0.3lf N"  % (loc.longitude*r2d, loc.latitude*r2d))
-        print("Date:      %4d %2d %2d"         % (time.year, time.month, time.day))
-        print("Time:      %2d %2d %9.6lf"      % (time.hour, time.minute, time.second))
-        print("JD:        %0.11lf"             % (pos.julianDay))
+        print("Location:  %0.3lf E, %0.3lf N"  % (st.geoLongitude*r2d, st.geoLatitude*r2d))
+        print("Date:      %4d %2d %2d"         % (st.year, st.month, st.day))
+        print("Time:      %2d %2d %9.6lf"      % (st.hour, st.minute, st.second))
+        print("JD:        %0.11lf"             % (st.julianDay))
         print()
         
-        print("Corrected azimuth, altitude:  %10.6lf° %10.6lf°" % (pos.azimuthRefract*r2d, pos.altitudeRefract*r2d))
-        print("Distance:                     %10.6lf AU"        % (pos.distance))
+        print("Corrected azimuth, altitude:  %10.6lf° %10.6lf°" % (st.azimuth*r2d, st.altitude*r2d))
+        print("Distance:                     %10.6lf AU"        % (st.distance))
         print()
     
-    return pos.azimuthRefract, pos.altitudeRefract, pos.distance
+    return st.azimuth, st.altitude, st.distance
 
 
 
