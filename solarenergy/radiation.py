@@ -185,16 +185,16 @@ def diffuse_radiation_projection_Perez87(DoY, alt, surfIncl, theta, Gbeam_n,Gdif
     
     Parameters:
       DoY       (int):     Day of year (Nday)
-      alt       (float):   Altitude of the Sun (radians)
+      alt       (float):   Altitude of the Sun (radians, may be an array)
       
       surfIncl  (float):   Surface inclination wrt horizontal (radians) - 0 = horizontal, pi/2 = vertical
-      theta     (float):   Angle between surface normal vector and Sun position vector (radians)
+      theta     (float):   Angle between surface normal vector and Sun position vector (radians, may be an array)
       
-      Gbeam_n   (float):   Beam (direct) normal radiation (W/m2; in the direction of the Sun)
-      Gdif_hor  (float):   Diffuse radiation on a horizontal surface (W/m2)
+      Gbeam_n   (float):   Beam (direct) normal radiation (W/m2; in the direction of the Sun, may be an array)
+      Gdif_hor  (float):   Diffuse radiation on a horizontal surface (W/m2, may be an array)
       
     Returns:
-      float:    Diffuse irradiation on the inclined surface (W/m2) (output)
+      float:    Diffuse irradiation on the inclined surface (W/m2) (may be an array)
 
     """
     
@@ -202,55 +202,83 @@ def diffuse_radiation_projection_Perez87(DoY, alt, surfIncl, theta, Gbeam_n,Gdif
     
     # *** Compute the brightness coefficients for the circumsolar (F1) and horizon (F2) regions ***
     
+    arrSize = np.size(alt)  # Size (length) of the 1D numpy arrays (1 if no arrays)
+    
     # 'External' (AM0) radiation:
     AM0rad = 1370 * (1 + 0.00333 * np.cos(pi2/365 * DoY))
     
     # Air mass:
-    if(alt < -3.885*d2r):
-        Mair = 99
-    elif(alt < 10*d2r):
-        Mair = 1 / ( np.sin(alt) + 0.15 * (alt*r2d + 3.885)**(-1.253) )
-    else:
-        Mair = 1 / np.sin(alt)
+    if(arrSize == 1):  # Scalar
+        if(alt < -3.885*d2r):
+            Mair = 99
+        elif(alt < 10*d2r):
+            Mair = 1 / ( np.sin(alt) + 0.15 * (alt*r2d + 3.885)**(-1.253) )
+        else:
+            Mair = 1 / np.sin(alt)
+    else:  # Array
+        Mair = np.ones(arrSize) * 36.51  # Air mass is 36.51 (value for alt=0), unless...
+        Mair[alt >= 10*d2r]    = 1 / np.sin(alt[alt >= 10*d2r])
+        Mair[alt <  10*d2r]    = 1 / ( np.sin(alt[alt < 10*d2r]) + 0.15 * (alt[alt < 10*d2r]*r2d + 3.885)**(-1.253) )
+        Mair[alt < -3.885*d2r] = 99
     
     Delta = Gdif_hor * Mair / AM0rad  # Brightness of overcast sky - par. 2.2.4 (a)
     
     
     # Cloudliness: epsilon;  epsilon ~ 1: overcast, epsilon -> infinity: clear  (epsilon ~ 1/fraction of covered sky)
     #   Needed for correct row in Table 1
-    if(Gdif_hor <= 0):  # Division by zero
-        if(Gbeam_n <= 0):  # No direct light: 0/0
-            epsilon = 0    # -> completely overcast - first row of Table 1
-        else:              # Some direct daylight: x/0 = large
-            epsilon = 99   # -> completely clear, should be >11 for last row of Table 1
-    else:
-        epsilon = (Gdif_hor + Gbeam_n) / Gdif_hor  # Overcast: epsilon ~ 1,  clear: epsilon -> infinity
+    if(arrSize == 1):  # Scalar
+        if(Gdif_hor <= 0):  # Division by zero
+            if(Gbeam_n <= 0):  # No direct light: 0/0
+                epsilon = 0    # -> completely overcast - first row of Table 1
+            else:              # Some direct daylight: x/0 = large
+                epsilon = 99   # -> completely clear, should be >11 for last row of Table 1
+        else:
+            epsilon = (Gdif_hor + Gbeam_n) / Gdif_hor  # Overcast: epsilon ~ 1,  clear: epsilon -> infinity
+    else:  # Array
+        epsilon = np.zeros(arrSize)                    # Set epsilon = 0 by default = completely overcast - first row of Table 1
+        epsilon[(Gdif_hor <= 0) & (Gbeam_n > 0)] = 99  # Some direct daylight: x/0 = large -> completely clear, should be >11 for last row of Table 1
+        epsilon[Gdif_hor > 0] = (Gdif_hor[Gdif_hor > 0] + Gbeam_n[Gdif_hor > 0]) / Gdif_hor[Gdif_hor > 0]  # Overcast: epsilon ~ 1,  clear: epsilon -> infinity
     
     
-    
-    # Table 1
+    # Table 1:
     f11=0;  f12=1;  f13=2;  f21=3; f22=4; f23=5
-    if(epsilon <= 1.056):
-        F = [-0.011,  0.748, -0.080, -0.048,  0.073, -0.024]
-    elif(epsilon <= 1.253):
-        F = [-0.038,  1.115, -0.109, -0.023,  0.106, -0.037]
-    elif(epsilon <= 1.586):
-        F = [ 0.166,  0.909, -0.179,  0.062, -0.021, -0.050]
-    elif(epsilon <= 2.134):
-        F = [ 0.419,  0.646, -0.262,  0.140, -0.167, -0.042]
-    elif(epsilon <= 3.230):
-        F = [ 0.710,  0.025, -0.290,  0.243, -0.511, -0.004]
-    elif(epsilon <= 5.980):
-        F = [ 0.857, -0.370, -0.279,  0.267, -0.792,  0.076]
-    elif(epsilon <= 10.080):
-        F = [ 0.734, -0.073, -0.228,  0.231, -1.180,  0.199]
-    else:
-        F = [ 0.421, -0.661,  0.097,  0.119, -2.125,  0.446]
     
-    
-    zeta = pio2 - alt  # Zenith angle = pi/2 - alt
-    F1 = F[f11]  +  F[f12] * Delta  +  F[f13] * zeta  # Circumsolar brightness coefficient
-    F2 = F[f21]  +  F[f22] * Delta  +  F[f23] * zeta  # Horizon brightness coefficient
+    if(arrSize == 1):  # Scalar
+        if(epsilon <= 1.056):
+            F = [-0.011,  0.748, -0.080, -0.048,  0.073, -0.024]
+        elif(epsilon <= 1.253):
+            F = [-0.038,  1.115, -0.109, -0.023,  0.106, -0.037]
+        elif(epsilon <= 1.586):
+            F = [ 0.166,  0.909, -0.179,  0.062, -0.021, -0.050]
+        elif(epsilon <= 2.134):
+            F = [ 0.419,  0.646, -0.262,  0.140, -0.167, -0.042]
+        elif(epsilon <= 3.230):
+            F = [ 0.710,  0.025, -0.290,  0.243, -0.511, -0.004]
+        elif(epsilon <= 5.980):
+            F = [ 0.857, -0.370, -0.279,  0.267, -0.792,  0.076]
+        elif(epsilon <= 10.080):
+            F = [ 0.734, -0.073, -0.228,  0.231, -1.180,  0.199]
+        else:
+            F = [ 0.421, -0.661,  0.097,  0.119, -2.125,  0.446]
+            
+        zeta = pio2 - alt  # Zenith angle = pi/2 - alt
+        F1 = F[f11]  +  F[f12] * Delta  +  F[f13] * zeta  # Circumsolar brightness coefficient
+        F2 = F[f21]  +  F[f22] * Delta  +  F[f23] * zeta  # Horizon brightness coefficient
+        
+    else:  # Array
+        F = np.empty((arrSize, 6))
+        F[                      (epsilon <=  1.056), :]  =  [-0.011,  0.748, -0.080, -0.048,  0.073, -0.024]
+        F[ (epsilon >  1.056) & (epsilon <=  1.253), :]  =  [-0.038,  1.115, -0.109, -0.023,  0.106, -0.037]
+        F[ (epsilon >  1.253) & (epsilon <=  1.586), :]  =  [ 0.166,  0.909, -0.179,  0.062, -0.021, -0.050]
+        F[ (epsilon >  1.586) & (epsilon <=  2.134), :]  =  [ 0.419,  0.646, -0.262,  0.140, -0.167, -0.042]
+        F[ (epsilon >  2.134) & (epsilon <=  3.230), :]  =  [ 0.710,  0.025, -0.290,  0.243, -0.511, -0.004]
+        F[ (epsilon >  3.230) & (epsilon <=  5.980), :]  =  [ 0.857, -0.370, -0.279,  0.267, -0.792,  0.076]
+        F[ (epsilon >  5.980) & (epsilon <= 10.080), :]  =  [ 0.734, -0.073, -0.228,  0.231, -1.180,  0.199]
+        F[ (epsilon > 10.080), :                      ]  =  [ 0.421, -0.661,  0.097,  0.119, -2.125,  0.446]
+        
+        zeta = pio2 - alt  # Zenith angle = pi/2 - alt
+        F1 = F[:, f11]  +  F[:, f12] * Delta  +  F[:, f13] * zeta  # Circumsolar brightness coefficient
+        F2 = F[:, f21]  +  F[:, f22] * Delta  +  F[:, f23] * zeta  # Horizon brightness coefficient
     
     
     
@@ -263,18 +291,24 @@ def diffuse_radiation_projection_Perez87(DoY, alt, surfIncl, theta, Gbeam_n,Gdif
     # Solid angle of the circumsolar region weighted by incidence on the HORIZONTAL (variable C, subscript H;
     #   see Nomenclature, under c):
     # psiH:
-    if(zeta > pio2 - alpha):
-        psiH = 0.5 * (pio2 - zeta + alpha) / alpha  # Dimensionless ratio
-    else:
-        psiH = 1
-    
+    if(arrSize == 1):  # Scalar
+        if(zeta > pio2 - alpha):
+            psiH = 0.5 * (pio2 - zeta + alpha) / alpha  # Dimensionless ratio
+        else:
+            psiH = 1
+    else:  # Array
+        psiH = np.ones(arrSize)
+        psiH[zeta > pio2 - alpha] = 0.5 * (pio2 - zeta[zeta > pio2 - alpha] + alpha) / alpha  # Dimensionless ratio
     
     # chiH:
-    if(zeta < pio2 - alpha):
+    if(arrSize == 1):  # Scalar
+        if(zeta < pio2 - alpha):
+            chiH = np.cos(zeta)  # = np.sin(alt)
+        else:
+            chiH = psiH * np.sin(psiH*alpha)
+    else:  # Array
         chiH = np.cos(zeta)  # = np.sin(alt)
-    else:
-        chiH = psiH * np.sin(psiH*alpha)
-    
+        chiH[zeta >= pio2 - alpha] = psiH[zeta >= pio2 - alpha] * np.sin(psiH[zeta >= pio2 - alpha] * alpha)
     
     C = 2 * (1 - np.cos(alpha)) * chiH  # Solid angle of the circumsolar region, weighted by HORIZONTAL incidence
     
@@ -285,13 +319,18 @@ def diffuse_radiation_projection_Perez87(DoY, alt, surfIncl, theta, Gbeam_n,Gdif
     psiC = 0.5 * (pio2 - theta + alpha) / alpha
     
     # chiC:
-    if(theta < pio2 - alpha):
-        chiC = psiH * np.cos(theta)
-    elif(theta < pio2 + alpha):
-        chiC = psiH * psiC * np.sin(psiC*alpha)
-    else:
-        chiC = 0
-    
+    if(arrSize == 1):  # Scalar
+        if(theta < pio2 - alpha):
+            chiC = psiH * np.cos(theta)
+        elif(theta < pio2 + alpha):
+            chiC = psiH * psiC * np.sin(psiC*alpha)
+        else:
+            chiC = 0
+            
+    else:  # Array
+        chiC = np.zeros(arrSize)
+        chiC[theta < pio2 + alpha] = psiH[theta < pio2 + alpha] * psiC[theta < pio2 + alpha] * np.sin(psiC[theta < pio2 + alpha] * alpha)
+        chiC[theta < pio2 - alpha] = psiH[theta < pio2 - alpha] * np.cos(theta[theta < pio2 - alpha])
     
     A = 2 * (1 - np.cos(alpha)) * chiC  # Solid angle of the circumsolar region, weighted by SLOPE incidence
     
@@ -299,11 +338,11 @@ def diffuse_radiation_projection_Perez87(DoY, alt, surfIncl, theta, Gbeam_n,Gdif
     
     # Diffuse radiation from circumsolar (F1) and horizon (F2) regions on the inclined surface (Eq.8):
     Gdif_inc_csl = Gdif_hor * ( 0.5 * (1 + np.cos(surfIncl)) * (1 - F1)  +  F1 * A/C )  # Circumsolar
-    Gdif_inc_hzl = Gdif_hor * ( F2 * np.sin(surfIncl) )                                         # Horizon band
+    Gdif_inc_hzl = Gdif_hor * ( F2 * np.sin(surfIncl) )                                 # Horizon band
     
     Gdif_inc_csl = np.maximum(Gdif_inc_csl, 0)  # Components are sometimes negative
     Gdif_inc_hzl = np.maximum(Gdif_inc_hzl, 0)
-    Gdif_inc = Gdif_inc_csl + Gdif_inc_hzl
+    Gdif_inc     = Gdif_inc_csl + Gdif_inc_hzl
     
     # Assign optional return values:
     # if(present(Gdif_inc_cs)) Gdif_inc_cs = Gdif_inc_csl
