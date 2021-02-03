@@ -105,7 +105,7 @@ def cosAngleSunPanels(spAz,spIncl, sunAz,sunAlt):
     """
     
     cosTheta = np.sin(sunAlt) * np.cos(spIncl)  +  np.cos(sunAlt) * np.sin(spIncl) * np.cos(sunAz - spAz)
-    cosTheta = max(cosTheta, 0)  # Return 0 rather than negative values (indicating radiation from behind).
+    cosTheta = np.maximum(cosTheta, 0)  # Return 0 rather than negative values (indicating radiation from behind).
     
     return cosTheta
 
@@ -132,7 +132,7 @@ def airmass(sunAlt, returnValueBelowHorizon=False):
     else:
         airmass = (1.002432*np.sin(sunAlt)**2 + 0.148386*np.sin(sunAlt) + 0.0096467) / \
                   (np.sin(sunAlt)**2*np.sin(sunAlt) + 0.149864*np.sin(sunAlt)**2 + 0.0102963*np.sin(sunAlt) + 0.000303978)
-        airmass = max( airmass, 1 )   # Air mass cannot be lower than 1
+        airmass = np.maximum( airmass, 1 )   # Air mass cannot be lower than 1
     
     return airmass
 
@@ -212,7 +212,7 @@ def diffuse_radiation_projection_Perez87(DoY, alt, surfIncl, theta, Gbeam_n,Gdif
         Mair = 1 / ( np.sin(alt) + 0.15 * (alt*r2d + 3.885)**(-1.253) )
     else:
         Mair = 1 / np.sin(alt)
-        
+    
     Delta = Gdif_hor * Mair / AM0rad  # Brightness of overcast sky - par. 2.2.4 (a)
     
     
@@ -301,8 +301,8 @@ def diffuse_radiation_projection_Perez87(DoY, alt, surfIncl, theta, Gbeam_n,Gdif
     Gdif_inc_csl = Gdif_hor * ( 0.5 * (1 + np.cos(surfIncl)) * (1 - F1)  +  F1 * A/C )  # Circumsolar
     Gdif_inc_hzl = Gdif_hor * ( F2 * np.sin(surfIncl) )                                         # Horizon band
     
-    Gdif_inc_csl = max(Gdif_inc_csl, 0)  # Components are sometimes negative
-    Gdif_inc_hzl = max(Gdif_inc_hzl, 0)
+    Gdif_inc_csl = np.maximum(Gdif_inc_csl, 0)  # Components are sometimes negative
+    Gdif_inc_hzl = np.maximum(Gdif_inc_hzl, 0)
     Gdif_inc = Gdif_inc_csl + Gdif_inc_hzl
     
     # Assign optional return values:
