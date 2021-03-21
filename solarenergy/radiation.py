@@ -1,7 +1,13 @@
-#  Copyright (c) 2020  Marc van der Sluys - marc.vandersluys.nl
+#!/bin/env python
+
+#  Copyright (c) 2020-2021  Marc van der Sluys - marc.vandersluys.nl
 #  
 #  This file is part of the SolarEnergy Python package, containing a Python module to do simple modelling in
 #  the field of solar energy.  See: https://github.com/MarcvdSluys/SolarEnergy
+#  
+#  SolarEnergy has been developed by Marc van der Sluys of the Department of Astrophysics at the Radboud
+#  University Nijmegen, the Netherlands and the department of Sustainable energy of the HAN University of
+#  applied sciences in Arnhem, the Netherlands.
 #  
 #  This is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License
 #  as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
@@ -16,7 +22,7 @@
 """Functions for solar energy dealing with (solar) radiation.
 
 References:
-  - M. van der Sluys, Celestial mechanics in a nutshell, https://cmians.sourceforge.io (2014).
+  - Marc van der Sluys, Celestial mechanics in a nutshell, https://cmians.sourceforge.io (2014).
       
 """
 
@@ -33,7 +39,7 @@ def computeSunPos(geoLon,geoLat, year,month,day, hour,minute=0,second=0, timezon
     """Compute the Sun local position (azimuth, altitude and distance) for the given geographical location and
     date and time using SolTrack.
     
-    Args:
+    Parameters:
         geoLon (float):  Geographic longitude to compute the Sun position for (rad).
         geoLat (float):  Geographic latitude to compute the Sun position for (rad).
     
@@ -55,7 +61,6 @@ def computeSunPos(geoLon,geoLat, year,month,day, hour,minute=0,second=0, timezon
             - azimuth (float):   Azimuth of the Sun (rad; south = 0 on the northern hemisphere).
             - altitude (float):  Altitude of the Sun (rad).
             - distance (float):  Distance Sun-Earth (AU).
-    
     """
     
     myTZ = tz.timezone(timezone)   # My timezone
@@ -92,7 +97,7 @@ def cosAngleSunPanels(spAz,spIncl, sunAz,sunAlt):
     the DNI to obtain the direct insolation on the panels.  See Celestial mechanics in a nutshell, Sect. 4.3:
     Insolation on an inclined surface (http://CMiaNS.sf.net).
     
-    Args:
+    Parameters:
         spAz (float):    Azimuth in which the solar panels are facing (rad; e.g. north or south = 0, same as sunAz).
         spIncl (float):  Inclination ('zenith angle') of the solar panels w.r.t. the horizontal (rad).
         sunAz (float):   Azimuth of the Sun (rad; e.g. north or south = 0, same as spAz).
@@ -114,7 +119,7 @@ def cosAngleSunPanels(spAz,spIncl, sunAz,sunAlt):
 def airmass(sunAlt, returnValueBelowHorizon=False):
     """Compute airmass as a function of Sun altitude.
     
-    Args:
+    Parameters:
         sunAlt (float):  Altitude of the Sun (rad).
         returnValueBelowHorizon (bool): Return a very large value when the Sun is below the horizon, larger
                                         when the Sun is lower.  This can be useful for solvers.  Default: False.
@@ -141,7 +146,7 @@ def airmass(sunAlt, returnValueBelowHorizon=False):
 def extinctionFactor(airmass, returnValueBelowHorizon=False):
     """Compute the atmospheric extinction factor for sunlight from the air mass.
     
-    Args:
+    Parameters:
         airmass (float):  Airmass at sea level (AM~1 if the Sun is in the zenith, AM~38 near the horizon).
         returnValueBelowHorizon (bool): Return a very large value when the Sun is below the horizon, larger
                                         when the Sun is lower.  This can be useful for solvers.  Default: False.
@@ -467,3 +472,9 @@ def diffuseRad_from_globalRad_sunshine(Gglob_hor, sunFrac, sunAlt, Iext):
     Gdif_hor  = Gglob_hor - Gbeam_hor
     
     return Gdif_hor, Gbeam_hor, DNI
+
+
+# Test code:
+if(__name__ == "__main__"):
+    from constants import r2d
+    print(cosAngleSunPanels(0.0,40*r2d, 0.0,50*r2d))

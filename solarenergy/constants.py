@@ -1,7 +1,13 @@
-#  Copyright (c) 2020  Marc van der Sluys - marc.vandersluys.nl
+#!/bin/env python
+
+#  Copyright (c) 2020-2021  Marc van der Sluys - marc.vandersluys.nl
 #  
 #  This file is part of the SolarEnergy Python package, containing a Python module to do simple modelling in
 #  the field of solar energy.  See: https://github.com/MarcvdSluys/SolarEnergy
+#  
+#  SolarEnergy has been developed by Marc van der Sluys of the Department of Astrophysics at the Radboud
+#  University Nijmegen, the Netherlands and the department of Sustainable energy of the HAN University of
+#  applied sciences in Arnhem, the Netherlands.
 #  
 #  This is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License
 #  as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
@@ -19,16 +25,20 @@
 
 
 # Modules:
-import math as m
+import numpy as np
 
-pi   = m.pi;           """pi"""
-pi2  = 2*pi;           """2 pi"""
-pio2 = pi/2;           """pi/2"""
+pi   = np.pi;           """pi"""
+pi2  = 2*pi;            """2 pi"""
+pio2 = pi/2;            """pi/2"""
 
-r2d  = m.degrees(1);   """Radians to degrees"""
-d2r  = m.radians(1);   """Degrees to radians"""
+r2d  = np.degrees(1);   """Radians to degrees"""
+d2r  = np.radians(1);   """Degrees to radians"""
 
-solConst = 1361.5;     """Solar constant: ~1361-1362 W/m² - https://en.wikipedia.org/wiki/Solar_constant"""
+solConst = 1361.5;      """Solar constant: ~1361-1362 W/m² - `Wikipedia <https://en.wikipedia.org/wiki/Solar_constant>`_"""
 
 
+# Test code:
+if(__name__ == "__main__"):
+    print(pi, r2d, solConst)
+    
 
