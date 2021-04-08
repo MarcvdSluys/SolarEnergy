@@ -35,9 +35,9 @@ import numpy as np
 from soltrack import SolTrack
 
 
-def computeSunPos(geoLon,geoLat, year,month,day, hour,minute=0,second=0, timezone='UTC', debug=False):
+def sun_position_from_date_and_time(geoLon,geoLat, year,month,day, hour,minute=0,second=0, timezone='UTC', debug=False):
     """Compute the Sun local position (azimuth, altitude and distance) for the given geographical location and
-    date and time using SolTrack.
+    date and time (ymd, hms) using SolTrack.
     
     Parameters:
         geoLon (float):  Geographic longitude to compute the Sun position for (rad).
@@ -63,14 +63,43 @@ def computeSunPos(geoLon,geoLat, year,month,day, hour,minute=0,second=0, timezon
             - distance (float):  Distance Sun-Earth (AU).
     """
     
+    # Create a timezone-aware datetime object:
     myTZ = tz.timezone(timezone)   # My timezone
     myTime = dt.datetime(int(year),int(month),int(day), int(hour),int(minute),int(second))  # Time w/o timezone
     lt = myTZ.localize(myTime, is_dst=None)  # Mark as local time
     utc = lt.astimezone(tz.utc)              # Convert to UTC
     
+    azimuth, altitude, distance = sun_position_from_datetime(geoLon,geoLat, utc, debug)
+    
+    return azimuth, altitude, distance
+
+
+
+def sun_position_from_datetime(geoLon,geoLat, date_time, debug=False):
+    """Compute the Sun local position (azimuth, altitude and distance) for the given geographical location and
+    a Python datetime using SolTrack.
+    
+    Parameters:
+        geoLon (float):  Geographic longitude to compute the Sun position for (rad).
+        geoLat (float):  Geographic latitude to compute the Sun position for (rad).
+    
+        date_time (datetime):   Date and time to compute the Sun position for (timezone aware).
+        
+        debug (bool):  Switch to write detailed output to stdout (optional; default = False).
+    
+    Returns:
+        tuple (float,float,float):  Tuple containing (azimuth, altitude, distance):
+    
+            - azimuth (float):   Azimuth of the Sun (rad; south = 0 on the northern hemisphere).
+            - altitude (float):  Altitude of the Sun (rad).
+            - distance (float):  Distance Sun-Earth (AU).
+    """
+    
+    utc = date_time.astimezone(tz.utc)                 # Convert to UTC
+    
     # Create a SolTrack instance for the desired location and specify preferences:
     st = SolTrack(geoLon,geoLat, computeRefrEquatorial=False)  # No need for equatorial coordinates
-    st.setDateTime(utc)   # Set the date and time:
+    st.setDateTime(utc)   # Set the date and time
     st.computePosition()  # Compute the Sun's position
     
     if(debug):
@@ -87,6 +116,14 @@ def computeSunPos(geoLon,geoLat, year,month,day, hour,minute=0,second=0, timezon
     
     return st.azimuth, st.altitude, st.distance
 
+
+
+def computeSunPos(geoLon,geoLat, year,month,day, hour,minute=0,second=0, timezone='UTC', debug=False):
+    """Obsolescent wrapper for sun_position_from_date_and_time().  Use that function instead!"""
+    
+    azimuth, altitude, distance = sun_position_from_date_and_time(geoLon,geoLat, year,month,day, hour,minute,second, timezone, debug)
+    
+    return azimuth, altitude, distance
 
 
 def cosAngleSunPanels(spAz,spIncl, sunAz,sunAlt):
@@ -452,7 +489,8 @@ def clearsky_bird(alt, Iext=1353,Rsun=1, Press=1013,  Uo=0.34,Uw=1.42, Ta5=0.266
 
 
 def diffuseRad_from_globalRad_sunshine(Gglob_hor, sunFrac, sunAlt, Iext):
-    """Compute the diffuse horizontal radiation from the global horizontal radiation and the Sun altitude.
+    """Compute the diffuse horizontal radiation from the global horizontal radiation, the fraction of sunshine
+    and the Sun altitude.
     
     Parameters:
       Gglob_hor (float):  Global horizontal radiation (W/m2).
