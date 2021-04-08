@@ -83,7 +83,7 @@ def sun_position_from_datetime(geoLon,geoLat, date_time, debug=False):
         geoLon (float):  Geographic longitude to compute the Sun position for (rad).
         geoLat (float):  Geographic latitude to compute the Sun position for (rad).
     
-        date_time (datetime):   Date and time to compute the Sun position for (timezone aware).
+        date_time (datetime):   Date and time to compute the Sun position for (timezone aware and/or UTC;  must be UTC if a list or (numpy) array).
         
         debug (bool):  Switch to write detailed output to stdout (optional; default = False).
     
@@ -95,12 +95,37 @@ def sun_position_from_datetime(geoLon,geoLat, date_time, debug=False):
             - distance (float):  Distance Sun-Earth (AU).
     """
     
-    utc = date_time.astimezone(tz.utc)                 # Convert to UTC
-    
     # Create a SolTrack instance for the desired location and specify preferences:
     st = SolTrack(geoLon,geoLat, computeRefrEquatorial=False)  # No need for equatorial coordinates
-    st.setDateTime(utc)   # Set the date and time
-    st.computePosition()  # Compute the Sun's position
+    
+    arrSize = np.size(date_time)  # Size (length) of the 1D numpy arrays (1 if no arrays)
+    if(arrSize==1):  # Scalar
+        utc = date_time.astimezone(tz.utc)  # Convert to UTC
+        st.setDateTime(utc)                 # Set the date and time
+        st.computePosition()                # Compute the Sun's position
+        
+        azimuth  = st.azimuth
+        altitude = st.altitude
+        distance = st.distance
+        
+    else:  # List or array
+        if(type(date_time) is not np.ndarray): date_time = np.array(date_time)  # If we have an array, but not numpy, make it one
+        utcs = date_time  # Numpy arrays are timezone-naive, and MUST be provided as UTC
+        
+        azimuth  = np.array([])
+        altitude = np.array([])
+        distance = np.array([])
+        
+        # Use a loop until we find a better solution:
+        for utc in utcs:
+            st.setDateTime(utc)   # Set the date and time
+            st.computePosition()  # Compute the Sun's position
+            
+            azimuth  = np.append(azimuth,  st.azimuth)
+            altitude = np.append(altitude, st.altitude)
+            distance = np.append(distance, st.distance)
+        
+            
     
     if(debug):
         r2d = 180/np.pi  # Convert radians to degrees
@@ -114,7 +139,7 @@ def sun_position_from_datetime(geoLon,geoLat, date_time, debug=False):
         print("Distance:                     %10.6lf AU"        % (st.distance))
         print()
     
-    return st.azimuth, st.altitude, st.distance
+    return azimuth, altitude, distance
 
 
 
