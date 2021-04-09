@@ -34,11 +34,12 @@ pio2 = pi/2;            """pi/2"""
 r2d  = np.degrees(1);   """Radians to degrees"""
 d2r  = np.radians(1);   """Degrees to radians"""
 
-solConst = 1361.5;      """Solar constant: ~1361-1362 W/m² - `Wikipedia <https://en.wikipedia.org/wiki/Solar_constant>`_"""
+solConst = 1361.5;      """Obsolescent; use sol_const instead!"""
+sol_const = 1361.5;     """Solar constant: ~1361-1362 W/m² - `Wikipedia <https://en.wikipedia.org/wiki/Solar_constant>`_"""
 
 
 # Test code:
 if(__name__ == "__main__"):
-    print(pi, r2d, solConst)
+    print(pi, r2d, sol_const)
     
 
