@@ -33,6 +33,7 @@ import pytz as tz
 import numpy as np
 
 from soltrack import SolTrack
+from .constants import solConst
 
 
 def sun_position_from_date_and_time(geoLon,geoLat, year,month,day, hour,minute=0,second=0, timezone='UTC', debug=False):
@@ -143,15 +144,7 @@ def sun_position_from_datetime(geoLon,geoLat, date_time, debug=False):
 
 
 
-def computeSunPos(geoLon,geoLat, year,month,day, hour,minute=0,second=0, timezone='UTC', debug=False):
-    """Obsolescent wrapper for sun_position_from_date_and_time().  Use that function instead!"""
-    
-    azimuth, altitude, distance = sun_position_from_date_and_time(geoLon,geoLat, year,month,day, hour,minute,second, timezone, debug)
-    
-    return azimuth, altitude, distance
-
-
-def cosAngleSunPanels(spAz,spIncl, sunAz,sunAlt):
+def cos_angle_sun_panels(spAz,spIncl, sunAz,sunAlt):
     """Compute the cosine of the angle between the orientation vector of the solar panels and the position vector
        of the Sun.
     
@@ -175,7 +168,6 @@ def cosAngleSunPanels(spAz,spIncl, sunAz,sunAlt):
     cosTheta = np.maximum(cosTheta, 0)  # Return 0 rather than negative values (indicating radiation from behind).
     
     return cosTheta
-
 
 
 def airmass(sunAlt, returnValueBelowHorizon=False):
@@ -223,7 +215,7 @@ def airmass(sunAlt, returnValueBelowHorizon=False):
 
 
 
-def extinctionFactor(airmass, returnValueBelowHorizon=False):
+def extinction_factor(airmass, returnValueBelowHorizon=False):
     """Compute the atmospheric extinction factor for sunlight from the air mass.
     
     Parameters:
@@ -279,7 +271,7 @@ def extinctionFactor(airmass, returnValueBelowHorizon=False):
     return extFac
 
 
-def diffuse_radiation_projection_Perez87(DoY, alt, surfIncl, theta, Gbeam_n,Gdif_hor):
+def diffuse_radiation_projection_perez87(DoY, alt, surfIncl, theta, Gbeam_n,Gdif_hor):
     
     """Compute diffuse radiation on an inclined surface using the 1987 Perez model
     
@@ -458,7 +450,6 @@ def diffuse_radiation_projection_Perez87(DoY, alt, surfIncl, theta, Gbeam_n,Gdif
     return Gdif_inc
 
 
-
 def clearsky_bird(alt, Iext=1353,Rsun=1, Press=1013,  Uo=0.34,Uw=1.42, Ta5=0.2661,Ta3=0.3538,Ba=0.84,K1=0.1, Rg=0.2):
     
     """A simplified clear-sky model for direct and diffuse insolation on horizontal surfaces.
@@ -553,7 +544,7 @@ def clearsky_bird(alt, Iext=1353,Rsun=1, Press=1013,  Uo=0.34,Uw=1.42, Ta5=0.266
     return Itot, Idir, Idif, Igr
 
 
-def diffuseRad_from_globalRad_sunshine(Gglob_hor, sunFrac, sunAlt, Iext):
+def diffuse_radiation_from_global_radiation_and_sunshine(Gglob_hor, sunFrac, sunAlt, Iext=solConst):
     """Compute the diffuse horizontal radiation from the global horizontal radiation, the fraction of sunshine
     and the Sun altitude.
     
@@ -561,6 +552,7 @@ def diffuseRad_from_globalRad_sunshine(Gglob_hor, sunFrac, sunAlt, Iext):
       Gglob_hor (float):  Global horizontal radiation (W/m2).
       sunFrac   (float):  Fraction of sunshine (e.g. fraction of cloud cover) (-; 0-1).
       sunAlt    (float):  Sun altitude above the horizon (rad).
+      Iext      (float):  Extraterrestrial radiation (W/m2).  Defaults to solar constant.
     
     Returns:
       tuple (float,float,float):  Tuple containing (Gdif_hor, Gbeam_hor, DNI):
@@ -570,12 +562,45 @@ def diffuseRad_from_globalRad_sunshine(Gglob_hor, sunFrac, sunAlt, Iext):
         - DNI       (float):  DNI = direct (beam) normal irradiation (W/m2).
     """
     
-    DNI = Iext / extinctionFactor(airmass(sunAlt)) * sunFrac  # (Mean) DNI
-    Gbeam_hor = DNI*np.sin(sunAlt)
-    Gdif_hor  = Gglob_hor - Gbeam_hor
+    DNI       = Iext / extinction_factor(airmass(sunAlt)) * sunFrac  # (Mean) DNI
+    Gbeam_hor = DNI*np.sin(sunAlt)                                   # Beam horizontal radiation
+    Gdif_hor  = Gglob_hor - Gbeam_hor                                # Diffuse horizontal radiation
     
     return Gdif_hor, Gbeam_hor, DNI
 
+
+# Obsolescent function aliases; wrapers around new functions for now, remove later.
+def computeSunPos(geoLon,geoLat, year,month,day, hour,minute=0,second=0, timezone='UTC', debug=False):
+    """Obsolescent wrapper for sun_position_from_date_and_time().  Use that function instead!"""
+    print("WARNING: computeSunPos() is an obsolescent alias for sun_position_from_date_and_time().  Use that function instead!")
+    azimuth, altitude, distance = sun_position_from_date_and_time(geoLon,geoLat, year,month,day, hour,minute,second, timezone, debug)
+    return azimuth, altitude, distance
+
+
+def cosAngleSunPanels(spAz,spIncl, sunAz,sunAlt):
+    """Obsolescent wrapper for cos_angle_sun_panels().  Use that function instead!"""
+    print("WARNING: cosAngleSunPanels() is an obsolescent alias for cos_angle_sun_panels().  Use that function instead!")
+    return cos_angle_sun_panels(spAz,spIncl, sunAz,sunAlt)
+
+
+def extinctionFactor(airmass, returnValueBelowHorizon=False):
+    """Obsolescent wrapper for extinction_factor().  Use that function instead!"""
+    print("WARNING: extinctionFactor() is an obsolescent alias for extinction_factor().  Use that function instead!")
+    return extinction_factor(airmass, returnValueBelowHorizon=False)
+
+
+def diffuse_radiation_projection_Perez87(DoY, alt, surfIncl, theta, Gbeam_n,Gdif_hor):
+    """Obsolescent wrapper for diffuse_radiation_projection_perez87().  Use that function instead!"""
+    print("WARNING: diffuse_radiation_projection_Perez87() is an obsolescent alias for diffuse_radiation_projection_perez87().  Use that function instead!")
+    return diffuse_radiation_projection_perez87(DoY, alt, surfIncl, theta, Gbeam_n,Gdif_hor)
+
+
+def diffuseRad_from_globalRad_sunshine(Gglob_hor, sunFrac, sunAlt, Iext=solConst):
+    """Obsolescent wrapper for diffuse_radiation_from_global_radiation_and_sunshine().  Use that function instead!"""
+    print("WARNING: diffuseRad_from_globalRad_sunshine() is an obsolescent alias for diffuse_radiation_from_global_radiation_and_sunshine().  Use that function instead!")
+    Gdif_hor, Gbeam_hor, DNI = diffuse_radiation_from_global_radiation_and_sunshine(Gglob_hor, sunFrac, sunAlt, Iext=solConst)
+    return Gdif_hor, Gbeam_hor, DNI
+    
 
 # Test code:
 if(__name__ == "__main__"):
