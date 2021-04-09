@@ -109,7 +109,7 @@ def sun_position_from_datetime(geoLon,geoLat, date_time, debug=False):
         distance = st.distance
         
     else:  # List or array
-        if(type(date_time) is not np.ndarray): date_time = np.array(date_time)  # If we have an array, but not numpy, make it one
+        if(type(date_time) is not np.ndarray): date_time = np.asarray(date_time)  # If we have an array-like structure, but not an ndarray, make it one
         utcs = date_time  # Numpy arrays are timezone-naive, and MUST be provided as UTC
         
         azimuth  = np.array([])
@@ -182,7 +182,7 @@ def airmass(sunAlt, returnValueBelowHorizon=False):
     """Compute airmass as a function of Sun altitude.
     
     Parameters:
-        sunAlt (float):  Altitude of the Sun (rad).
+        sunAlt (float):  Altitude of the Sun (rad), can be an array.
         returnValueBelowHorizon (bool): Return a very large value when the Sun is below the horizon, larger
                                         when the Sun is lower.  This can be useful for solvers.  Default: False.
     
@@ -191,16 +191,34 @@ def airmass(sunAlt, returnValueBelowHorizon=False):
     
     """
     
-    if(sunAlt < -0.00989):
-        if(returnValueBelowHorizon):
-            airmass = 1000 * (0.15 + abs(sunAlt))  # Very bad, but still getting worse for lower Sun, for solvers
+    if(np.ndim(sunAlt) == 0):  # Scalar:
+        if(sunAlt < -0.00989):
+            if(returnValueBelowHorizon):
+                airmass = 1000 * (0.15 + abs(sunAlt))  # Very bad, but still getting worse for even lower Sun, for solvers
+            else:
+                airmass = float('inf')
         else:
-            airmass = float('inf')
-    else:
-        airmass = (1.002432*np.sin(sunAlt)**2 + 0.148386*np.sin(sunAlt) + 0.0096467) / \
-                  (np.sin(sunAlt)**2*np.sin(sunAlt) + 0.149864*np.sin(sunAlt)**2 + 0.0102963*np.sin(sunAlt) + 0.000303978)
-        airmass = np.maximum( airmass, 1 )   # Air mass cannot be lower than 1
-    
+            airmass = (1.002432*np.sin(sunAlt)**2 + 0.148386*np.sin(sunAlt) + 0.0096467) / \
+                      (np.sin(sunAlt)**2*np.sin(sunAlt) + 0.149864*np.sin(sunAlt)**2 + 0.0102963*np.sin(sunAlt) + 0.000303978)
+            airmass = np.maximum( airmass, 1 )   # Air mass cannot be lower than 1
+            
+    else:  # Array-like:
+        if(type(sunAlt) is not np.ndarray): sunAlt = np.asarray(sunAlt)  # Ensure this is a numpy.ndarray
+        airmass = np.empty(sunAlt.shape)
+        
+        # Sun below the horizon:
+        sel = (sunAlt < -0.00989)
+        if(returnValueBelowHorizon):
+            airmass[sel] = 1000 * (0.15 + abs(sunAlt[sel]))  # Very bad, but still getting worse for even lower Sun, for solvers
+        else:
+            airmass[sel] = float('inf')
+            
+        # Sun above the horizon:
+        sel = (sunAlt >= -0.00989)
+        airmass[sel] = (1.002432*np.sin(sunAlt[sel])**2 + 0.148386*np.sin(sunAlt[sel]) + 0.0096467) / \
+            (np.sin(sunAlt[sel])**2*np.sin(sunAlt[sel]) + 0.149864*np.sin(sunAlt[sel])**2 + 0.0102963*np.sin(sunAlt[sel]) + 0.000303978)
+        airmass[sel] = np.maximum( airmass[sel], 1 )   # Air mass cannot be lower than 1
+            
     return airmass
 
 
@@ -209,7 +227,7 @@ def extinctionFactor(airmass, returnValueBelowHorizon=False):
     """Compute the atmospheric extinction factor for sunlight from the air mass.
     
     Parameters:
-        airmass (float):  Airmass at sea level (AM~1 if the Sun is in the zenith, AM~38 near the horizon).
+        airmass (float):  Airmass at sea level (AM~1 if the Sun is in the zenith, AM~38 near the horizon), can be an array.
         returnValueBelowHorizon (bool): Return a very large value when the Sun is below the horizon, larger
                                         when the Sun is lower.  This can be useful for solvers.  Default: False.
     
@@ -219,22 +237,44 @@ def extinctionFactor(airmass, returnValueBelowHorizon=False):
 
     """
     
-    if(airmass > 38.2):
-        if(returnValueBelowHorizon):
-            extFac = np.sqrt(sys.float_info.max) * (0.15 + airmass)  # Very bad, but still getting worse for higher airmass, for solvers
+    coefs = [ 9.1619283e-2, 2.6098406e-1,-3.6487512e-2, 6.4036283e-3,-8.1993861e-4, 6.9994043e-5,-3.8980993e-6,
+              1.3929599e-7, -3.0685834e-9, 3.7844273e-11,-1.9955057e-13]  # Fit coefficients
+    
+    if(np.ndim(airmass) == 0):  # Scalar:
+        if(airmass > 38.2):
+            if(returnValueBelowHorizon):
+                extFac = np.sqrt(sys.float_info.max) * (0.15 + airmass)  # Very bad, but still getting worse for even higher airmass, for solvers
+            else:
+                extFac = float('inf')
         else:
-            extFac = float('inf')
-    else:
-        coefs = [ 9.1619283e-2, 2.6098406e-1,-3.6487512e-2, 6.4036283e-3,-8.1993861e-4, 6.9994043e-5,-3.8980993e-6,
-                  1.3929599e-7, -3.0685834e-9, 3.7844273e-11,-1.9955057e-13]
-        
-        AMpow = 1.0                      # AM^0
-        ext = coefs[0]                   # c_1 * AM^0
-        for iCoef in range(1,len(coefs)):
-            AMpow *= airmass             # AM^(i-1)
-            ext += coefs[iCoef] * AMpow  # + c_i * AM^(i-1)
+            AMpow = 1.0                      # AM^0
+            ext = coefs[0]                   # c_1 * AM^0
+            for iCoef in range(1,len(coefs)):
+                AMpow *= airmass             # AM^(i-1)
+                ext += coefs[iCoef] * AMpow  # + c_i * AM^(i-1)
+                
+            extFac = np.exp(ext)
             
-        extFac = np.exp(ext)
+    else:  # Array-like:
+        if(type(airmass) is not np.ndarray): airmass = np.asarray(airmass)  # Ensure this is a numpy.ndarray
+        extFac  = np.empty(airmass.shape)
+        
+        # Sun below the horizon:
+        sel = (airmass > 38.2)
+        if(returnValueBelowHorizon):
+            extFac[sel] = np.sqrt(sys.float_info.max) * (0.15 + airmass[sel])  # Very bad, but still getting worse for even higher airmass, for solvers
+        else:
+            extFac[sel] = float('inf')
+            
+        # Sun above the horizon:
+        AMpow = np.ones(airmass.shape)             # AM^0 = 1
+        ext   = np.ones(airmass.shape) * coefs[0]  # c_1 * AM^0
+        sel = (airmass <= 38.2)
+        for iCoef in range(1,len(coefs)):
+            AMpow[sel] *= airmass[sel]             # AM^(i-1)
+            ext[sel] += coefs[iCoef] * AMpow[sel]  # + c_i * AM^(i-1)
+        
+        extFac[sel] = np.exp(ext[sel])
         
     return extFac
 
