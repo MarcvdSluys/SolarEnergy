@@ -27,13 +27,18 @@ References:
 """
 
 
+# Allow relative imports from __main__() when running this file (PEP 366):
+if(__name__ == "__main__" and __package__ is None):
+    __package__ = "solarenergy"
+
+
 import sys
 import datetime as dt
 import pytz as tz
 import numpy as np
 
 from soltrack import SolTrack
-from .constants import sol_const
+from .constants import pi2,pio2, d2r,r2d, sol_const
 
 
 def sun_position_from_date_and_time(geo_lon,geo_lat, year,month,day, hour,minute=0,second=0, timezone='UTC', debug=False):
@@ -297,8 +302,6 @@ def diffuse_radiation_projection_perez87(doy, sun_alt, surf_incl, theta, beam_no
       
     """
     
-    from solarenergy.constants import pi2,pio2, d2r,r2d
-    
     # *** Compute the brightness coefficients for the circumsolar (F1) and horizon (F2) regions ***
     
     arrSize = np.size(sun_alt)  # Size (length) of the 1D numpy arrays (1 if no arrays)
@@ -493,8 +496,6 @@ def clearsky_bird(sun_alt, i_ext=1353,sun_dist=1, press=1013,  uo=0.34,uw=1.42, 
       
     """
     
-    from solarenergy.constants import pio2, r2d
-    
     Z = pio2 - sun_alt  # Solar zenith angle
     cosZ = np.cos(Z)    # Save a few CPU cycles
     
@@ -602,5 +603,4 @@ def diffuseRad_from_globalRad_sunshine(glob_horiz, sun_frac, sun_alt, i_ext=sol_
 
 # Test code:
 if(__name__ == "__main__"):
-    from constants import r2d
-    print(cosAngleSunPanels(0.0,40*r2d, 0.0,50*r2d))
+    print(cos_angle_sun_panels(0.0,40*r2d, 0.0,50*r2d))
