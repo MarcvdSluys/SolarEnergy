@@ -2,6 +2,7 @@
 
 ![PyPI](https://img.shields.io/pypi/v/solarenergy?color=%230A0)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/solarenergy)
+[![Code check](https://github.com/MarcvdSluys/SolarEnergy/actions/workflows/code-check.yml/badge.svg)](https://github.com/MarcvdSluys/SolarEnergy/actions/workflows/code-check.yml)
 [![Documentation
 Status](https://readthedocs.org/projects/solarenergy/badge/?version=latest)](https://solarenergy.readthedocs.io/en/latest/?badge=latest)
 ![PyPI - License](https://img.shields.io/pypi/l/solarenergy?color=%230A0)
