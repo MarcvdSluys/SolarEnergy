@@ -1,4 +1,5 @@
 #!/bin/env python
+# -*- coding: utf-8 -*-
 
 #  Copyright (c) 2020-2021  Marc van der Sluys - marc.vandersluys.nl
 #  
@@ -39,7 +40,6 @@ sol_const = 1361.5;     """Solar constant: ~1361-1362 W/m² - `Wikipedia <https:
 
 
 # Test code:
-if(__name__ == "__main__"):
+if(__name__ == '__main__'):
     print(pi, r2d, sol_const)
     
-

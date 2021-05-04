@@ -1,4 +1,5 @@
 #!/bin/env python
+# -*- coding: utf-8 -*-
 
 #  Copyright (c) 2020-2021  Marc van der Sluys - marc.vandersluys.nl
 #  
@@ -28,8 +29,8 @@ References:
 
 
 # Allow relative imports from __main__() when running this file (PEP 366):
-if(__name__ == "__main__" and __package__ is None):
-    __package__ = "solarenergy"
+if(__name__ == '__main__' and __package__ is None):
+    __package__ = 'solarenergy'
 
 
 import sys
@@ -135,14 +136,14 @@ def sun_position_from_datetime(geo_lon,geo_lat, date_time, debug=False):
     
     if(debug):
         r2d = 180/np.pi  # Convert radians to degrees
-        print("Location:  %0.3lf E, %0.3lf N"  % (st.geo_longitude*r2d, st.geo_latitude*r2d))
-        print("Date:      %4d %2d %2d"         % (st.year, st.month, st.day))
-        print("Time:      %2d %2d %9.6lf"      % (st.hour, st.minute, st.second))
-        print("JD:        %0.11lf"             % (st.julianDay))
+        print('Location:  %0.3lf E, %0.3lf N'  % (st.geo_longitude*r2d, st.geo_latitude*r2d))
+        print('Date:      %4d %2d %2d'         % (st.year, st.month, st.day))
+        print('Time:      %2d %2d %9.6lf'      % (st.hour, st.minute, st.second))
+        print('JD:        %0.11lf'             % (st.julianDay))
         print()
         
-        print("Corrected azimuth, altitude:  %10.6lf° %10.6lf°" % (st.azimuth*r2d, st.altitude*r2d))
-        print("Distance:                     %10.6lf AU"        % (st.distance))
+        print('Corrected azimuth, altitude:  %10.6lf° %10.6lf°' % (st.azimuth*r2d, st.altitude*r2d))
+        print('Distance:                     %10.6lf AU'        % (st.distance))
         print()
     
     return azimuth, altitude, distance
@@ -573,34 +574,34 @@ def diffuse_radiation_from_global_radiation_and_sunshine(glob_horiz, sun_frac, s
 # Obsolescent function aliases; wrapers around new functions for now, remove later.
 def computeSunPos(geo_lon,geo_lat, year,month,day, hour,minute=0,second=0, timezone='UTC', debug=False):
     """Obsolescent wrapper for sun_position_from_date_and_time().  Use that function instead!"""
-    print("WARNING: computeSunPos() is an obsolescent alias for sun_position_from_date_and_time().  Use that function instead!")
+    print('WARNING: computeSunPos() is an obsolescent alias for sun_position_from_date_and_time().  Use that function instead!')
     return sun_position_from_date_and_time(geo_lon,geo_lat, year,month,day, hour,minute,second, timezone, debug)
 
 
 def cosAngleSunPanels(sp_az,sp_incl, sun_az,sun_alt):
     """Obsolescent wrapper for cos_angle_sun_panels().  Use that function instead!"""
-    print("WARNING: cosAngleSunPanels() is an obsolescent alias for cos_angle_sun_panels().  Use that function instead!")
+    print('WARNING: cosAngleSunPanels() is an obsolescent alias for cos_angle_sun_panels().  Use that function instead!')
     return cos_angle_sun_panels(sp_az,sp_incl, sun_az,sun_alt)
 
 
 def extinctionFactor(airmass, return_value_below_horizon=False):
     """Obsolescent wrapper for extinction_factor().  Use that function instead!"""
-    print("WARNING: extinctionFactor() is an obsolescent alias for extinction_factor().  Use that function instead!")
+    print('WARNING: extinctionFactor() is an obsolescent alias for extinction_factor().  Use that function instead!')
     return extinction_factor(airmass, return_value_below_horizon=False)
 
 
 def diffuse_radiation_projection_Perez87(doy, alt, surf_incl, theta, beam_norm,dif_horiz):
     """Obsolescent wrapper for diffuse_radiation_projection_perez87().  Use that function instead!"""
-    print("WARNING: diffuse_radiation_projection_Perez87() is an obsolescent alias for diffuse_radiation_projection_perez87().  Use that function instead!")
+    print('WARNING: diffuse_radiation_projection_Perez87() is an obsolescent alias for diffuse_radiation_projection_perez87().  Use that function instead!')
     return diffuse_radiation_projection_perez87(doy, alt, surf_incl, theta, beam_norm,dif_horiz)
 
 
 def diffuseRad_from_globalRad_sunshine(glob_horiz, sun_frac, sun_alt, i_ext=sol_const):
     """Obsolescent wrapper for diffuse_radiation_from_global_radiation_and_sunshine().  Use that function instead!"""
-    print("WARNING: diffuseRad_from_globalRad_sunshine() is an obsolescent alias for diffuse_radiation_from_global_radiation_and_sunshine().  Use that function instead!")
+    print('WARNING: diffuseRad_from_globalRad_sunshine() is an obsolescent alias for diffuse_radiation_from_global_radiation_and_sunshine().  Use that function instead!')
     return diffuse_radiation_from_global_radiation_and_sunshine(glob_horiz, sun_frac, sun_alt, i_ext=sol_const)
     
 
 # Test code:
-if(__name__ == "__main__"):
+if(__name__ == '__main__'):
     print(cos_angle_sun_panels(0.0,40*r2d, 0.0,50*r2d))

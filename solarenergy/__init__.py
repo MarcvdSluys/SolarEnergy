@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #  Copyright (c) 2020-2021  Marc van der Sluys - marc.vandersluys.nl
 #   
 #  This file is part of the SolarEnergy Python package, containing a Python module to do simple modelling in
@@ -31,10 +32,7 @@ Information on the theory behind this code can be found in the document
 """
 
 
-name = "solarenergy"
+name = 'solarenergy'
 
 from .constants import *
 from .radiation import *
-
-
-
