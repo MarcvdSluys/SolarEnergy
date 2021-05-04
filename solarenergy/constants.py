@@ -42,4 +42,3 @@ sol_const = 1361.5;     """Solar constant: ~1361-1362 W/m² - `Wikipedia <https:
 # Test code:
 if(__name__ == '__main__'):
     print(pi, r2d, sol_const)
-    
