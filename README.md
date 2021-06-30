@@ -7,7 +7,7 @@
 Status](https://readthedocs.org/projects/solarenergy/badge/?version=latest)](https://solarenergy.readthedocs.io/en/latest/?badge=latest)
 ![PyPI - License](https://img.shields.io/pypi/l/solarenergy?color=%230A0)
 
-A Python module to do simple modelling in the field of solar energy.  The code is being developped by [Marc
+A Python module to do simple modelling in the field of solar energy.  The code is being developed by [Marc
 van der Sluys](http://han.vandersluys.nl/en/) of the department of astrophysics of the Radboud University
 Nijmegen, the Netherlands and the department of Sustainable energy of the HAN University of Applied Sciences
 in Arnhem, the Netherlands.

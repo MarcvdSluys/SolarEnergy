@@ -20,7 +20,7 @@ setup(
     url='https://github.com/MarcvdSluys/SolarEnergy',
     
     packages=['solarenergy'],
-    install_requires=['pytz','numpy','soltrack>=0.1.0'],
+    install_requires=['numpy','pytz','soltrack>=0.1.0'],
     long_description=long_description,
     long_description_content_type='text/markdown',
     
