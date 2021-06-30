@@ -1,0 +1,3 @@
+meteoserver==0.0.13
+numpy==1.21.0
+soltrack==0.1.4
