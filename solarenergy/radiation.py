@@ -58,7 +58,7 @@ def sun_position_from_date_and_time(geo_lon,geo_lat, year,month,day, hour,minute
         minute   (int):    Minute to compute the Sun position for (optional; default = 0).
         second   (int):    Second to compute the Sun position for (optional; default = 0).
     
-        timezone (str):    Time zone for which date and time are provided (optional; default = 'UTC').
+        timezone (str):    Timezone for which date and time are provided (optional; default = 'UTC').
     
         debug    (bool):   Switch to write detailed output to stdout (optional; default = False).
     
@@ -72,9 +72,9 @@ def sun_position_from_date_and_time(geo_lon,geo_lat, year,month,day, hour,minute
     
     # Create a timezone-aware datetime object:
     myTZ   = tz.timezone(timezone)   # My timezone
-    myTime = dt.datetime(int(year),int(month),int(day), int(hour),int(minute),int(second))  # Time w/o timezone
+    myTime = dt.datetime(int(year),int(month),int(day), int(hour),int(minute),int(second))  # Timezone-naive time
     lt     = myTZ.localize(myTime, is_dst=None)  # Mark as local time
-    utc    = lt.astimezone(tz.utc)              # Convert to UTC
+    utc    = lt.astimezone(tz.utc)               # Convert to UTC
     
     azimuth, altitude, distance = sun_position_from_datetime(geo_lon,geo_lat, utc, debug)
     
@@ -90,7 +90,7 @@ def sun_position_from_datetime(geo_lon,geo_lat, date_time, debug=False):
         geo_lon (float):       Geographic longitude to compute the Sun position for (rad).
         geo_lat (float):       Geographic latitude to compute the Sun position for (rad).
     
-        date_time (datetime):  Date and time to compute the Sun position for (timezone aware and/or UTC;  must be UTC if a list or (numpy) array).
+        date_time (datetime):  Date and time to compute the Sun position for (timezone aware and/or UTC, i.e. must be UTC if timezone naive.  CHECK: must be UTC if a list or (numpy) array?).
         
         debug (bool):          Switch to write detailed output to stdout (optional; default = False).
     
@@ -117,7 +117,7 @@ def sun_position_from_datetime(geo_lon,geo_lat, date_time, debug=False):
         
     else:  # List or array
         if(type(date_time) is not np.ndarray): date_time = np.asarray(date_time)  # If we have an array-like structure, but not an ndarray, make it one
-        utcs = date_time  # Numpy arrays are timezone-naive, and MUST be provided as UTC
+        utcs = date_time  # NOT TRUE???  Numpy arrays are timezone-naive, and MUST be provided as UTC
         
         azimuth  = np.array([])
         altitude = np.array([])
