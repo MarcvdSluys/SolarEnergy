@@ -29,7 +29,7 @@ References:
 
 
 # Allow relative imports from __main__() when running this file (PEP 366):
-if(__name__ == '__main__' and __package__ is None):
+if __name__ == '__main__' and __package__ is None:
     __package__ = 'solarenergy'
 
 
@@ -296,7 +296,7 @@ def diffuse_radiation_projection_perez87(doy, sun_alt, surf_incl, theta, beam_no
       theta     (float):   Angle between surface normal vector and Sun position vector (radians, may be an array)
       
       beam_norm (float):   Beam (direct) normal radiation = DNI (W/m2; in the direction of the Sun, may be an array)
-      dif_horiz (float):   Diffuse radiation on a horizontal surface (W/m2, may be an array)
+      dif_horiz (float):   Diffuse radiation on a horizontal surface = DHI (W/m2, may be an array)
       
     Returns:
       float:    Diffuse irradiation on the inclined surface (W/m2) (may be an array)
@@ -559,9 +559,9 @@ def diffuse_radiation_from_global_radiation_and_sunshine(glob_horiz, sun_frac, s
     Returns:
       tuple (float,float,float):  Tuple containing (dif_horiz, beam_horiz, beam_norm):
       
-        - dif_horiz  (float):  Diffuse horizontal radiation (W/m2).
-        - beam_horiz (float):  Beam (direct) horizontal radiation (W/m2).
-        - beam_norm  (float):  Beam (direct) normal radiation = DNI (W/m2).
+        - dif_horiz  (float):  Diffuse horizontal radiation = DHI (W/m2).
+        - beam_horiz (float):  Beam (direct) horizontal radiation = BHI (W/m2).
+        - beam_norm  (float):  Beam (direct) normal radiation = BNI = DNI (W/m2).
     """
     
     beam_norm  = i_ext / extinction_factor(airmass(sun_alt)) * sun_frac  # (Mean) DNI
@@ -603,5 +603,5 @@ def diffuseRad_from_globalRad_sunshine(glob_horiz, sun_frac, sun_alt, i_ext=sol_
     
 
 # Test code:
-if(__name__ == '__main__'):
+if __name__ == '__main__':
     print(cos_angle_sun_panels(0.0,40*r2d, 0.0,50*r2d))
