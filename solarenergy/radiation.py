@@ -105,34 +105,28 @@ def sun_position_from_datetime(geo_lon,geo_lat, date_time, debug=False):
     # Create a SolTrack instance for the desired location and specify preferences:
     st = SolTrack(geo_lon,geo_lat, computeRefrEquatorial=False)  # No need for equatorial coordinates
     
-    arrSize = np.size(date_time)  # Size (length) of the 1D numpy arrays (1 if no arrays)
-    if(arrSize==1):  # Scalar
-        utc = date_time.astimezone(tz.utc)  # Convert to UTC
-        st.setDateTime(utc)                 # Set the date and time
-        st.computePosition()                # Compute the Sun's position
+    date_time = np.asarray(date_time)
+    scalar_input = False
+    if date_time.ndim == 0:
+        date_time = date_time[np.newaxis]  # Convert scalar to 1D array
+        scalar_input = True
+    
+    utcs = date_time  # NOT TRUE???  Numpy arrays are timezone-naive, and MUST be provided as UTC
+    
+    azimuth         = np.array([])
+    altitude        = np.array([])
+    distance        = np.array([])
+    
+    # Use a loop until we find a better solution:
+    for utc in utcs:
+        st.setDateTime(utc)   # Set the date and time
+        st.computePosition()  # Compute the Sun's position
         
-        azimuth  = st.azimuth
-        altitude = st.altitude
-        distance = st.distance
-        
-    else:  # List or array
-        if(type(date_time) is not np.ndarray): date_time = np.asarray(date_time)  # If we have an array-like structure, but not an ndarray, make it one
-        utcs = date_time  # NOT TRUE???  Numpy arrays are timezone-naive, and MUST be provided as UTC
-        
-        azimuth  = np.array([])
-        altitude = np.array([])
-        distance = np.array([])
-        
-        # Use a loop until we find a better solution:
-        for utc in utcs:
-            st.setDateTime(utc)   # Set the date and time
-            st.computePosition()  # Compute the Sun's position
-            
-            azimuth  = np.append(azimuth,  st.azimuth)
-            altitude = np.append(altitude, st.altitude)
-            distance = np.append(distance, st.distance)
-        
-            
+        azimuth         = np.append(azimuth, st.azimuth)
+        altitude        = np.append(altitude, st.altitude)
+        distance        = np.append(distance, st.distance)
+    
+    
     
     if(debug):
         r2d = 180/np.pi  # Convert radians to degrees
@@ -145,6 +139,10 @@ def sun_position_from_datetime(geo_lon,geo_lat, date_time, debug=False):
         print('Corrected azimuth, altitude:  %10.6lf° %10.6lf°' % (st.azimuth*r2d, st.altitude*r2d))
         print('Distance:                     %10.6lf AU'        % (st.distance))
         print()
+    
+    
+    if scalar_input:
+        return np.asscalar(azimuth), np.asscalar(altitude), np.asscalar(distance)
     
     return azimuth, altitude, distance
 
@@ -167,7 +165,7 @@ def cos_angle_sun_panels(sp_az,sp_incl, sun_az,sun_alt):
     Returns:
         float:  The cosine between the normal vector of the solar panels and the position vector of the Sun (rad).
                 Note that this value is zero (indicating radiation from behind the panels) or positive.
-
+                
     """
     
     cos_theta = np.sin(sun_alt) * np.cos(sp_incl)  +  np.cos(sun_alt) * np.sin(sp_incl) * np.cos(sun_az - sp_az)
@@ -189,34 +187,30 @@ def airmass(sun_alt, return_value_below_horizon=False):
     
     """
     
-    if(np.ndim(sun_alt) == 0):  # Scalar:
-        if(sun_alt < -0.00989):
-            if(return_value_below_horizon):
-                airmass = 1000 * (0.15 + abs(sun_alt))  # Very bad, but still getting worse for even lower Sun, for solvers
-            else:
-                airmass = float('inf')
-        else:
-            airmass = (1.002432*np.sin(sun_alt)**2 + 0.148386*np.sin(sun_alt) + 0.0096467) / \
-                      (np.sin(sun_alt)**2*np.sin(sun_alt) + 0.149864*np.sin(sun_alt)**2 + 0.0102963*np.sin(sun_alt) + 0.000303978)
-            airmass = np.maximum( airmass, 1 )   # Air mass cannot be lower than 1
-            
-    else:  # Array-like:
-        if(type(sun_alt) is not np.ndarray): sun_alt = np.asarray(sun_alt)  # Ensure this is a numpy.ndarray
-        airmass = np.empty(sun_alt.shape)
-        
-        # Sun below the horizon:
-        sel = (sun_alt < -0.00989)
-        if(return_value_below_horizon):
-            airmass[sel] = 1000 * (0.15 + abs(sun_alt[sel]))  # Very bad, but still getting worse for even lower Sun, for solvers
-        else:
-            airmass[sel] = float('inf')
-            
-        # Sun above the horizon:
-        sel = (sun_alt >= -0.00989)
-        airmass[sel] = (1.002432*np.sin(sun_alt[sel])**2 + 0.148386*np.sin(sun_alt[sel]) + 0.0096467) / \
-            (np.sin(sun_alt[sel])**2*np.sin(sun_alt[sel]) + 0.149864*np.sin(sun_alt[sel])**2 + 0.0102963*np.sin(sun_alt[sel]) + 0.000303978)
-        airmass[sel] = np.maximum( airmass[sel], 1 )   # Air mass cannot be lower than 1
-            
+    sun_alt = np.asarray(sun_alt)
+    scalar_input = False
+    if sun_alt.ndim == 0:
+        sun_alt = sun_alt[np.newaxis]  # converts scalar to 1D array
+        scalar_input = True
+    
+    airmass = np.empty(sun_alt.shape)
+    
+    # Sun below the horizon:
+    sel = (sun_alt < -0.00989)
+    if(return_value_below_horizon):
+        airmass[sel] = 1000 * (0.15 + abs(sun_alt[sel]))  # Very bad, but still getting worse for even lower Sun, for solvers
+    else:
+        airmass[sel] = float('inf')
+    
+    # Sun above the horizon:
+    sel = (sun_alt >= -0.00989)
+    airmass[sel] = (1.002432 * np.sin(sun_alt[sel]) ** 2 + 0.148386 * np.sin(sun_alt[sel]) + 0.0096467) / \
+        (np.sin(sun_alt[sel]) ** 2 * np.sin(sun_alt[sel]) + 0.149864 * np.sin(sun_alt[sel]) ** 2 + 0.0102963 * np.sin(sun_alt[sel]) + 0.000303978)
+    airmass[sel] = np.maximum(airmass[sel], 1)  # Air mass cannot be lower than 1
+    
+    if scalar_input:
+        return np.asscalar(airmass)
+    
     return airmass
 
 
@@ -232,53 +226,44 @@ def extinction_factor(airmass, return_value_below_horizon=False):
     Returns: 
         float: The extinciton factor for sunlight in the atmosphere.  Divide the extraterrestrial (AM)
                radiation (or, if unknown, solar constant) by this number to obtain the DNI.
-
+    
     """
     
     coefs = [ 9.1619283e-2, 2.6098406e-1,-3.6487512e-2, 6.4036283e-3,-8.1993861e-4, 6.9994043e-5,-3.8980993e-6,
               1.3929599e-7, -3.0685834e-9, 3.7844273e-11,-1.9955057e-13]  # Fit coefficients
     
-    if(np.ndim(airmass) == 0):  # Scalar:
-        if(airmass > 38.2):
-            if(return_value_below_horizon):
-                ext_fac = np.sqrt(sys.float_info.max) * (0.15 + airmass)  # Very bad, but still getting worse for even higher airmass, for solvers
-            else:
-                ext_fac = float('inf')
-        else:
-            AMpow = 1.0                      # AM^0
-            ext = coefs[0]                   # c_1 * AM^0
-            for iCoef in range(1,len(coefs)):
-                AMpow *= airmass             # AM^(i-1)
-                ext += coefs[iCoef] * AMpow  # + c_i * AM^(i-1)
-                
-            ext_fac = np.exp(ext)
-            
-    else:  # Array-like:
-        if(type(airmass) is not np.ndarray): airmass = np.asarray(airmass)  # Ensure this is a numpy.ndarray
-        ext_fac  = np.empty(airmass.shape)
-        
-        # Sun below the horizon:
-        sel = (airmass > 38.2)
-        if(return_value_below_horizon):
-            ext_fac[sel] = np.sqrt(sys.float_info.max) * (0.15 + airmass[sel])  # Very bad, but still getting worse for even higher airmass, for solvers
-        else:
-            ext_fac[sel] = float('inf')
-            
-        # Sun above the horizon:
-        AMpow = np.ones(airmass.shape)             # AM^0 = 1
-        ext   = np.ones(airmass.shape) * coefs[0]  # c_1 * AM^0
-        sel = (airmass <= 38.2)
-        for iCoef in range(1,len(coefs)):
-            AMpow[sel] *= airmass[sel]             # AM^(i-1)
-            ext[sel] += coefs[iCoef] * AMpow[sel]  # + c_i * AM^(i-1)
-        
-        ext_fac[sel] = np.exp(ext[sel])
-        
+    airmass = np.asarray(airmass)
+    scalar_input = False
+    if airmass.ndim == 0:
+        airmass = airmass[np.newaxis]  # converts scalar to 1D array
+        scalar_input = True
+    
+    ext_fac = np.empty(airmass.shape)
+    
+    # Sun below the horizon:
+    sel = (airmass > 38.2)
+    if(return_value_below_horizon):
+        ext_fac[sel] = np.sqrt(sys.float_info.max) * (0.15 + airmass[sel])  # Very bad, but still getting worse for even higher airmass, for solvers
+    else:
+        ext_fac[sel] = float('inf')
+    
+    # Sun above the horizon:
+    AMpow = np.ones(airmass.shape)             # AM^0 = 1
+    ext = np.ones(airmass.shape) * coefs[0]    # c_1 * AM^0
+    sel = (airmass <= 38.2)
+    for iCoef in range(1, len(coefs)):
+        AMpow[sel] *= airmass[sel]             # AM^(i-1)
+        ext[sel] += coefs[iCoef] * AMpow[sel]  # + c_i * AM^(i-1)
+    
+    ext_fac[sel] = np.exp(ext[sel])
+    
+    if scalar_input:
+        return np.asscalar(ext_fac)
+    
     return ext_fac
 
 
 def diffuse_radiation_projection_perez87(doy, sun_alt, surf_incl, theta, beam_norm, dif_horiz):
-    
     """Compute diffuse radiation on an inclined surface using the 1987 Perez model
     
     This function is adapted from the libTheSky Fortran implementation (libthesky.sf.net).
@@ -429,7 +414,7 @@ def diffuse_radiation_projection_perez87(doy, sun_alt, surf_incl, theta, beam_no
             chiC = psiH * psiC * np.sin(psiC*alpha)
         else:
             chiC = 0
-            
+    
     else:  # Array
         chiC = np.zeros(arrSize)
         chiC[theta < pio2 + alpha] = psiH[theta < pio2 + alpha] * psiC[theta < pio2 + alpha] * np.sin(psiC[theta < pio2 + alpha] * alpha)
@@ -455,7 +440,6 @@ def diffuse_radiation_projection_perez87(doy, sun_alt, surf_incl, theta, beam_no
 
 
 def clearsky_bird(sun_alt, i_ext=1353,sun_dist=1, press=1013,  uo=0.34,uw=1.42, ta5=0.2661,ta3=0.3538,ba=0.84,k1=0.1, rg=0.2):
-    
     """A simplified clear-sky model for direct and diffuse insolation on horizontal surfaces.
     
     A.k.a. as "the Bird model".
@@ -468,7 +452,7 @@ def clearsky_bird(sun_alt, i_ext=1353,sun_dist=1, press=1013,  uo=0.34,uw=1.42, 
     Note that the value of Taa does not agree with tabulated values from the paper, and hence neither do
     dependent values (except for AM~1).  When I substitute their values for Taa, everything matches perfectly.
     Error in their formula, or (hopefully!) in their table?
-
+    
     Parameters:
       sun_alt   (float):  Sun altitude above the horizon (rad)
     
