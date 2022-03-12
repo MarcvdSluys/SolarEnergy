@@ -24,19 +24,17 @@
 
 """
 
-
 # Modules:
 import numpy as np
 
-pi   = np.pi;           """pi"""
-pi2  = 2*pi;            """2 pi"""
-pio2 = pi/2;            """pi/2"""
+# pi   = np.pi           # pi
+pi2  = 2*pi            # 2 pi
+pio2 = pi/2            # pi/2
 
-r2d  = np.degrees(1);   """Radians to degrees"""
-d2r  = np.radians(1);   """Degrees to radians"""
+r2d  = np.degrees(1)   # Radians to degrees
+d2r  = np.radians(1)   # Degrees to radians
 
-solConst = 1361.5;      """Obsolescent; use sol_const instead!"""
-sol_const = 1361.5;     """Solar constant: ~1361-1362 W/m² - Wikipedia: https://en.wikipedia.org/wiki/Solar_constant"""
+sol_const = 1361.5     # Solar constant: ~1361-1362 W/m² - Wikipedia: https://en.wikipedia.org/wiki/Solar_constant"""
 
 
 # Test code:
