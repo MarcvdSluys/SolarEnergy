@@ -32,7 +32,7 @@ if __name__ == '__main__' and __package__ is None:
 
 import sys
 import datetime as dt
-import pytz as tz
+import pytz as tz          # confusing because dummy argument of functions in datetime module is also "tz="
 import numpy as np
 from numpy.polynomial import Polynomial
 
@@ -103,38 +103,32 @@ def sun_position_from_datetime(geo_lon, geo_lat, date_time, debug=False):
     # Create a SolTrack instance for the desired location and specify preferences:
     st = SolTrack(geo_lon, geo_lat, computeRefrEquatorial=False)  # No need for equatorial coordinates
 
-    arrSize = np.size(date_time)  # Size (length) of the 1D numpy arrays (1 if no arrays)
-    if arrSize == 1:  # Scalar
-        utc = date_time.astimezone(tz.utc)  # Convert to UTC
+    date_time = np.asarray(date_time)
+    scalar_input = False
+    if date_time.ndim == 0:
+        # date_time = date-time[None]      # Makes x 1D
+        date_time = date_time[np.newaxis]  # Makes x 1D
+        scalar_input = True
+
+    utcs = date_time  # NOT TRUE???  Numpy arrays are timezone-naive, and MUST be provided as UTC
+
+    azimuth = np.array([])
+    altitude = np.array([])
+    altitude_uncorr = np.array([])
+    distance = np.array([])
+
+    # Use a loop until we find a better solution:
+    for utc in utcs:
         st.setDateTime(utc)  # Set the date and time
         st.computePosition()  # Compute the Sun's position
 
-        azimuth = st.azimuth
-        altitude = st.altitude
-        distance = st.distance
-
-    else:  # List or array
-        if type(date_time) is not np.ndarray: date_time = np.asarray(date_time)
-        # If we have an array-like structure, but not an ndarray, make it one
-        utcs = date_time  # NOT TRUE???  Numpy arrays are timezone-naive, and MUST be provided as UTC
-
-        azimuth = np.array([])
-        altitude = np.array([])
-        altitude_uncorr = np.array([])
-        distance = np.array([])
-
-        # Use a loop until we find a better solution:
-        for utc in utcs:
-            st.setDateTime(utc)  # Set the date and time
-            st.computePosition()  # Compute the Sun's position
-
-            azimuth = np.append(azimuth, st.azimuth)
-            altitude = np.append(altitude, st.altitude)
-            altitude_uncorr = np.append(altitude_uncorr, st.altitudeUncorr)
-            distance = np.append(distance, st.distance)
+        azimuth = np.append(azimuth, st.azimuth)
+        altitude = np.append(altitude, st.altitude)
+        altitude_uncorr = np.append(altitude_uncorr, st.altitudeUncorr)
+        distance = np.append(distance, st.distance)
 
     if debug:
-        r2d = 180 / np.pi  # Convert radians to degrees
+        # r2d = 180 / np.pi  # Convert radians to degrees
         print('Location:  %0.3lf E, %0.3lf N' % (st.geo_longitude * r2d, st.geo_latitude * r2d))
         print('Date:      %4d %2d %2d' % (st.year, st.month, st.day))
         print('Time:      %2d %2d %9.6lf' % (st.hour, st.minute, st.second))
@@ -145,6 +139,9 @@ def sun_position_from_datetime(geo_lon, geo_lat, date_time, debug=False):
         print('Distance:                     %10.6lf AU' % (st.distance))
         print()
 
+    if scalar_input:
+        # return np.squeeze(ret)
+        return np.asscalar(azimuth), np.asscalar(altitude), np.asscalar(altitude_uncorr), np.asscalar(distance)
     return azimuth, altitude, altitude_uncorr, distance
 
 
@@ -213,7 +210,6 @@ def airmass(sun_alt, return_value_below_horizon=False):
     airmass[sel] = np.maximum(airmass[sel], 1)  # Air mass cannot be lower than 1
 
     if scalar_input:
-        # return np.squeeze(ret)
         return np.asscalar(airmass)
     return airmass
 
@@ -258,9 +254,11 @@ def extinction_factor(airmass, return_value_below_horizon=False):
         AMpow[sel] *= airmass[sel]  # AM^(i-1)
         ext[sel] += coefs[iCoef] * AMpow[sel]  # + c_i * AM^(i-1)
 
+    # p = Polynomial(coefs)
+    # ext[sel] = p(airmass)
+
     ext_fac[sel] = np.exp(ext[sel])
     if scalar_input:
-        # return np.squeeze(ret)
         return np.asscalar(ext_fac)
     return ext_fac
 
@@ -560,3 +558,4 @@ def diffuse_radiation_from_global_radiation_and_sunshine(glob_horiz, sun_frac, s
 # Test code:
 if __name__ == '__main__':
     print(cos_angle_sun_panels(0.0, 40 * r2d, 0.0, 50 * r2d))
+

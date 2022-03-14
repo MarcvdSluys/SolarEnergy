@@ -26,17 +26,16 @@
 
 # Modules:
 import numpy as np
+pi   = np.pi
+pi2  = 2*np.pi           # 2 pi
+pio2 = np.pi/2           # pi/2
 
-# pi   = np.pi           # pi
-pi2  = 2*pi            # 2 pi
-pio2 = pi/2            # pi/2
+r2d = np.degrees(1)      # Radians to degrees
+d2r = np.radians(1)      # Degrees to radians
 
-r2d  = np.degrees(1)   # Radians to degrees
-d2r  = np.radians(1)   # Degrees to radians
-
-sol_const = 1361.5     # Solar constant: ~1361-1362 W/m² - Wikipedia: https://en.wikipedia.org/wiki/Solar_constant"""
+sol_const = 1361.5      # Solar constant: ~1361-1362 W/m² - Wikipedia: https://en.wikipedia.org/wiki/Solar_constant"""
 
 
 # Test code:
 if __name__ == '__main__':
-    print(pi, r2d, sol_const)
+    print(r2d, sol_const)
