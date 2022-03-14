@@ -111,6 +111,14 @@ def sun_position_from_datetime(geo_lon, geo_lat, date_time, debug=False):
         scalar_input = True
 
     utcs = date_time  # NOT TRUE???  Numpy arrays are timezone-naive, and MUST be provided as UTC
+    # NOT TRUE! utcs is a ndarray(8760,) of:
+    #    - Timezone aware pandas.Timestamp objects.
+    #    - Timezone-aware Python datetime.datetime objects.
+    # These can be UTC or CET/CEST local Timestamps/ datetime objects.
+    # so, maybe we should reconsider the variable name utcs
+    # both input types are correctly localized to UTC
+    # and split into components YY, MM, DD, HH, mm and ss (float)
+    # by SolTrack
 
     azimuth = np.array([])
     altitude = np.array([])

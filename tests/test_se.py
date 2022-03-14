@@ -47,8 +47,10 @@ def test_positions():
     # PVLIB
     pos_pv = get_solarposition(times2020, lat_deg, lon_deg, method='nrel_numpy')
     # solarenergy
-    # times2020_dt = times5060.to_pydatetime()
-    sunAz, sunAlt, sunDist = se.sun_position_from_datetime(lon_rad, lat_rad, times2020)
+    times2020_dt = times2020.to_pydatetime()
+    sunAz, sunAlt, sunDist = se.sun_position_from_datetime(lon_rad, lat_rad, times2020_dt)
+    # sunAz, sunAlt, sunAltUncorr, sunDist = se.sun_position_from_datetime(lon_rad, lat_rad, times2020)
+
     # calculate differences
     diff_az = (np.rad2deg(sunAz) + 180.0) - pos_pv['azimuth']
     diff_elev = np.rad2deg(sunAlt) - pos_pv['apparent_elevation']
