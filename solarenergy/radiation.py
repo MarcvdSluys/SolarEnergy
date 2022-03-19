@@ -488,7 +488,7 @@ def clearsky_bird(sun_alt, i_ext=1353,sun_dist=1, press=1013,  uo=0.34,uw=1.42, 
     
     
     Returns:
-      tuple (float,float,float,float):  Tuple containing (rv1, rv2):
+      tuple (float,float,float,float):  Tuple containing (i_tot, i_dir, i_dif, i_gr):
         
       - i_tot  (float):  Total insolation on a horizontal surface (W/m^2)
       - i_dir  (float):  Direct (beam) insolation on a horizontal surface (W/m^2)

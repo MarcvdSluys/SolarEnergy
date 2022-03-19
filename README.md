@@ -43,16 +43,16 @@ day   = 1
 hour  = 13
 
 # Compute Sun position (uses SolTrack behind the scenes):
-sunAz,sunAlt,sunDist = se.computeSunPos(geoLon,geoLat, year,month,day, hour, timezone=myTZ)
+sunAz,sunAlt,sunDist = se.sun_position_from_date_and_time(geoLon,geoLat, year,month,day, hour, timezone=myTZ)
 
-AM        = se.airmass(sunAlt)                               # Air mass for this Sun altitude
-extFac    = se.extinctionFactor(AM)                          # Extinction factor at sea level for this airmass
-cosTheta  = se.cosAngleSunPanels(spAz,spIncl, sunAz,sunAlt)  # cos of the angle with which Sun hits my panels
-theta     = np.arccos(cosTheta)                              # Angle with which Sun hits my panels
+AM        = se.airmass(sunAlt)                                  # Air mass for this Sun altitude
+extFac    = se.extinction_factor(AM)                            # Extinction factor at sea level for this airmass
+cosTheta  = se.cos_angle_sun_panels(spAz,spIncl, sunAz,sunAlt)  # cos of the angle with which Sun hits my panels
+theta     = np.arccos(cosTheta)                                 # Angle with which Sun hits my panels
 
-Iext      = se.solConst / sunDist**2                         # Extraterrestrial radiation = Solar constant, scaled with distance
-DNIcs     = Iext / extFac                                    # DNI for a clear sky
-dirRad    = DNIcs * cosTheta                                 # Insolation of direct sunlight on my panels
+Iext      = se.solConst / sunDist**2                            # Extraterrestrial radiation = Solar constant, scaled with distance
+DNIcs     = Iext / extFac                                       # DNI for a clear sky
+dirRad    = DNIcs * cosTheta                                    # Insolation of direct sunlight on my panels
 
 
 # Print input and output:
