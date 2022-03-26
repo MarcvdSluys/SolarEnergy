@@ -604,4 +604,4 @@ def diffuseRad_from_globalRad_sunshine(glob_horiz, sun_frac, sun_alt, i_ext=sol_
 
 # Test code:
 if __name__ == '__main__':
-    print(cos_angle_sun_panels(0.0,40*r2d, 0.0,50*r2d))
+    print(cos_angle_sun_panels(0.0,40*d2r, 0.0,30*d2r))
