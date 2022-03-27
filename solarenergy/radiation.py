@@ -33,12 +33,7 @@ if __name__ == '__main__' and __package__ is None:
     __package__ = 'solarenergy'
 
 
-import sys
-import datetime as dt
-import pytz as tz
 import numpy as np
-
-from soltrack import SolTrack
 from astroconst import pi2,pio2, d2r,r2d, sol_const
 
 
@@ -71,6 +66,8 @@ def sun_position_from_date_and_time(geo_lon,geo_lat, year,month,day, hour,minute
     """
     
     # Create a timezone-aware datetime object:
+    import datetime as dt
+    import pytz as tz
     myTZ   = tz.timezone(timezone)   # My timezone
     myTime = dt.datetime(int(year),int(month),int(day), int(hour),int(minute),int(second))  # Timezone-naive time
     lt     = myTZ.localize(myTime, is_dst=None)  # Mark as local time
@@ -103,6 +100,7 @@ def sun_position_from_datetime(geo_lon,geo_lat, date_time, debug=False):
     """
     
     # Create a SolTrack instance for the desired location and specify preferences:
+    from soltrack import SolTrack
     st = SolTrack(geo_lon,geo_lat, computeRefrEquatorial=False)  # No need for equatorial coordinates
     
     date_time = np.asarray(date_time)
@@ -245,6 +243,7 @@ def extinction_factor(airmass, return_value_below_horizon=False):
     # Sun below the horizon:
     sel = (airmass > 38.2)
     if return_value_below_horizon:
+        import sys
         ext_fac[sel] = np.sqrt(sys.float_info.max) * (0.15 + airmass[sel])  # Very bad, but still getting worse for even higher airmass, for solvers
     else:
         ext_fac[sel] = float('inf')
