@@ -557,33 +557,33 @@ def diffuse_radiation_from_global_radiation_and_sunshine(glob_horiz, sun_frac, s
 
 # Obsolescent function aliases; wrapers around new functions for now, remove later.
 def computeSunPos(geo_lon,geo_lat, year,month,day, hour,minute=0,second=0, timezone='UTC', debug=False):
-    """Obsolescent wrapper for sun_position_from_date_and_time().  Use that function instead!"""
-    print('WARNING: computeSunPos() is an obsolescent alias for sun_position_from_date_and_time().  Use that function instead!')
-    return sun_position_from_date_and_time(geo_lon,geo_lat, year,month,day, hour,minute,second, timezone, debug)
+    """Obsolete version of sun_position_from_date_and_time().  Use that function instead!"""
+    print('ERROR: computeSunPos() is an obsolete version of sun_position_from_date_and_time().  Use that function instead!')
+    exit(1)
 
 
 def cosAngleSunPanels(sp_az,sp_incl, sun_az,sun_alt):
-    """Obsolescent wrapper for cos_angle_sun_panels().  Use that function instead!"""
-    print('WARNING: cosAngleSunPanels() is an obsolescent alias for cos_angle_sun_panels().  Use that function instead!')
-    return cos_angle_sun_panels(sp_az,sp_incl, sun_az,sun_alt)
+    """Obsolete version of cos_angle_sun_panels().  Use that function instead!"""
+    print('ERROR: cosAngleSunPanels() is an obsolete version of cos_angle_sun_panels().  Use that function instead!')
+    exit(1)
 
 
 def extinctionFactor(airmass, return_value_below_horizon=False):
-    """Obsolescent wrapper for extinction_factor().  Use that function instead!"""
-    print('WARNING: extinctionFactor() is an obsolescent alias for extinction_factor().  Use that function instead!')
-    return extinction_factor(airmass, return_value_below_horizon=False)
+    """Obsolete version of extinction_factor().  Use that function instead!"""
+    print('ERROR: extinctionFactor() is an obsolete version of extinction_factor().  Use that function instead!')
+    exit(1)
 
 
 def diffuse_radiation_projection_Perez87(doy, alt, surf_incl, theta, beam_norm,dif_horiz):
-    """Obsolescent wrapper for diffuse_radiation_projection_perez87().  Use that function instead!"""
-    print('WARNING: diffuse_radiation_projection_Perez87() is an obsolescent alias for diffuse_radiation_projection_perez87().  Use that function instead!')
-    return diffuse_radiation_projection_perez87(doy, alt, surf_incl, theta, beam_norm,dif_horiz)
+    """Obsolete version of diffuse_radiation_projection_perez87().  Use that function instead!"""
+    print('ERROR: diffuse_radiation_projection_Perez87() is an obsolete version of diffuse_radiation_projection_perez87().  Use that function instead!')
+    exit(1)
 
 
 def diffuseRad_from_globalRad_sunshine(glob_horiz, sun_frac, sun_alt, i_ext=sol_const):
-    """Obsolescent wrapper for diffuse_radiation_from_global_radiation_and_sunshine().  Use that function instead!"""
-    print('WARNING: diffuseRad_from_globalRad_sunshine() is an obsolescent alias for diffuse_radiation_from_global_radiation_and_sunshine().  Use that function instead!')
-    return diffuse_radiation_from_global_radiation_and_sunshine(glob_horiz, sun_frac, sun_alt, i_ext=sol_const)
+    """Obsolete version of diffuse_radiation_from_global_radiation_and_sunshine().  Use that function instead!"""
+    print('ERROR: diffuseRad_from_globalRad_sunshine() is an obsolete version of diffuse_radiation_from_global_radiation_and_sunshine().  Use that function instead!')
+    exit(1)
     
 
 # Test code:

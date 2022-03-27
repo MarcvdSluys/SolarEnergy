@@ -50,7 +50,7 @@ extFac    = se.extinction_factor(AM)                            # Extinction fac
 cosTheta  = se.cos_angle_sun_panels(spAz,spIncl, sunAz,sunAlt)  # cos of the angle with which Sun hits my panels
 theta     = np.arccos(cosTheta)                                 # Angle with which Sun hits my panels
 
-Iext      = se.solConst / sunDist**2                            # Extraterrestrial radiation = Solar constant, scaled with distance
+Iext      = se.sol_const / sunDist**2                           # Extraterrestrial radiation = Solar constant, scaled with distance
 DNIcs     = Iext / extFac                                       # DNI for a clear sky
 dirRad    = DNIcs * cosTheta                                    # Insolation of direct sunlight on my panels
 
@@ -71,7 +71,7 @@ print("Extinction factor:           %7.3lf"              % (extFac))
 print("Sun-panels angle:            %7.1lf°"             % (theta*se.r2d))
 print()
 
-print("Solar constant:              %7.1lf W/m²"         % (se.solConst))
+print("Solar constant:              %7.1lf W/m²"         % (se.sol_const))
 print("Extraterrestrial radiation:  %7.1lf W/m²"         % (Iext))
 print("DNI (clear sky):             %7.1lf W/m²"         % (DNIcs))
 print("Direct insolation:           %7.1lf W/m²"         % (dirRad))
