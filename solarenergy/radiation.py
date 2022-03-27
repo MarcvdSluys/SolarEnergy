@@ -39,7 +39,7 @@ import pytz as tz
 import numpy as np
 
 from soltrack import SolTrack
-from .constants import pi2,pio2, d2r,r2d, sol_const
+from astroconst import pi2,pio2, d2r,r2d, sol_const
 
 
 def sun_position_from_date_and_time(geo_lon,geo_lat, year,month,day, hour,minute=0,second=0, timezone='UTC', debug=False):

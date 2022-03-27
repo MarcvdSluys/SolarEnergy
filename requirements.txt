@@ -1,3 +1,4 @@
-numpy==1.21.1
-pytz==2021.1
+astroconst==0.0.3
+numpy==1.22.3
+pytz==2021.3
 soltrack==0.1.4

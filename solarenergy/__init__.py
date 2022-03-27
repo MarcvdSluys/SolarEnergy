@@ -36,5 +36,4 @@ Information on the theory behind this code can be found in the document
 
 name = 'solarenergy'
 
-from .constants import *
 from .radiation import *
