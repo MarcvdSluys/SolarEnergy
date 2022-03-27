@@ -1,7 +1,7 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021  Marc van der Sluys - marc.vandersluys.nl
+#  Copyright (c) 2020-2022  Marc van der Sluys - marc.vandersluys.nl
 #  
 #  This file is part of the SolarEnergy Python package, containing a Python module to do simple modelling in
 #  the field of solar energy.  See: https://github.com/MarcvdSluys/SolarEnergy
@@ -23,7 +23,7 @@
 """Functions for solar energy dealing with (solar) radiation.
 
 References:
-  - Marc van der Sluys, Celestial mechanics in a nutshell, https://cmians.sourceforge.io (2014).
+  - Marc van der Sluys, Celestial mechanics in a nutshell, https://cmians.sourceforge.io (2014-2022).
       
 """
 
@@ -128,7 +128,7 @@ def sun_position_from_datetime(geo_lon,geo_lat, date_time, debug=False):
     
     
     
-    if(debug):
+    if debug:
         r2d = 180/np.pi  # Convert radians to degrees
         print('Location:  %0.3lf E, %0.3lf N'  % (st.geo_longitude*r2d, st.geo_latitude*r2d))
         print('Date:      %4d %2d %2d'         % (st.year, st.month, st.day))
@@ -178,26 +178,28 @@ def airmass(sun_alt, return_value_below_horizon=False):
     """Compute airmass as a function of Sun altitude.
     
     Parameters:
-        sun_alt                    (float):  Altitude of the Sun (rad), can be an array.
+        sun_alt                    (float):  True altitude of the Sun (uncorrected for atmospheric refraction; rad), can be an array.
         return_value_below_horizon (bool):   Return a very large value when the Sun is below the horizon, larger
                                              when the Sun is lower.  This can be useful for solvers.  Default: False.
     
     Returns:
         float:  Airmass at sea level (AM~1 if the Sun is in the zenith, AM~38 near the horizon).
     
+    References:
+        A.T. Young, "AIR-MASS AND REFRACTION," Applied Optics, vol. 33, pp. 1108-1110, Feb 1994.
     """
     
     sun_alt = np.asarray(sun_alt)
     scalar_input = False
     if sun_alt.ndim == 0:
-        sun_alt = sun_alt[np.newaxis]  # converts scalar to 1D array
+        sun_alt = sun_alt[np.newaxis]  # Convert scalar to 1D array
         scalar_input = True
     
     airmass = np.empty(sun_alt.shape)
     
     # Sun below the horizon:
     sel = (sun_alt < -0.00989)
-    if(return_value_below_horizon):
+    if return_value_below_horizon:
         airmass[sel] = 1000 * (0.15 + abs(sun_alt[sel]))  # Very bad, but still getting worse for even lower Sun, for solvers
     else:
         airmass[sel] = float('inf')
@@ -229,20 +231,20 @@ def extinction_factor(airmass, return_value_below_horizon=False):
     
     """
     
-    coefs = [ 9.1619283e-2, 2.6098406e-1,-3.6487512e-2, 6.4036283e-3,-8.1993861e-4, 6.9994043e-5,-3.8980993e-6,
+    coefs = [ 9.1619283e-2,  2.6098406e-1,-3.6487512e-2,  6.4036283e-3,-8.1993861e-4, 6.9994043e-5,-3.8980993e-6,
               1.3929599e-7, -3.0685834e-9, 3.7844273e-11,-1.9955057e-13]  # Fit coefficients
     
     airmass = np.asarray(airmass)
     scalar_input = False
     if airmass.ndim == 0:
-        airmass = airmass[np.newaxis]  # converts scalar to 1D array
+        airmass = airmass[np.newaxis]  # Convert scalar to 1D array
         scalar_input = True
     
     ext_fac = np.empty(airmass.shape)
     
     # Sun below the horizon:
     sel = (airmass > 38.2)
-    if(return_value_below_horizon):
+    if return_value_below_horizon:
         ext_fac[sel] = np.sqrt(sys.float_info.max) * (0.15 + airmass[sel])  # Very bad, but still getting worse for even higher airmass, for solvers
     else:
         ext_fac[sel] = float('inf')
@@ -296,10 +298,10 @@ def diffuse_radiation_projection_perez87(doy, sun_alt, surf_incl, theta, beam_no
     AM0rad = 1370 * (1 + 0.00333 * np.cos(pi2/365 * doy))
     
     # Air mass:
-    if(arrSize == 1):  # Scalar
-        if(sun_alt < -3.885*d2r):
+    if arrSize == 1:  # Scalar
+        if sun_alt < -3.885*d2r:
             Mair = 99
-        elif(sun_alt < 10*d2r):
+        elif sun_alt < 10*d2r:
             Mair = 1 / ( np.sin(sun_alt) + 0.15 * (sun_alt*r2d + 3.885)**(-1.253) )
         else:
             Mair = 1 / np.sin(sun_alt)
@@ -314,42 +316,42 @@ def diffuse_radiation_projection_perez87(doy, sun_alt, surf_incl, theta, beam_no
     
     # Cloudliness: epsilon;  epsilon ~ 1: overcast, epsilon -> infinity: clear  (epsilon ~ 1/fraction of covered sky)
     #   Needed for correct row in Table 1
-    if(arrSize == 1):  # Scalar
-        if(dif_horiz <= 0):  # Division by zero
-            if(beam_norm <= 0):  # No direct light: 0/0
-                epsilon = 0    # -> completely overcast - first row of Table 1
-            else:              # Some direct daylight: x/0 = large
-                epsilon = 99   # -> completely clear, should be >11 for last row of Table 1
+    if arrSize == 1:  # Scalar
+        if dif_horiz <= 0:  # Division by zero
+            if beam_norm <= 0:  # No direct light: 0/0
+                epsilon = 0     # -> completely overcast - first row of Table 1
+            else:               # Some direct daylight: x/0 = large
+                epsilon = 99    # -> completely clear, should be >11 for last row of Table 1
         else:
             epsilon = (dif_horiz + beam_norm) / dif_horiz  # Overcast: epsilon ~ 1,  clear: epsilon -> infinity
     else:  # Array
-        epsilon = np.zeros(arrSize)                    # Set epsilon = 0 by default = completely overcast - first row of Table 1
-        epsilon[(dif_horiz <= 0) & (beam_norm > 0)] = 99  # Some direct daylight: x/0 = large -> completely clear, should be >11 for last row of Table 1
+        epsilon = np.zeros(arrSize)                        # Set epsilon = 0 by default = completely overcast - first row of Table 1
+        epsilon[(dif_horiz <= 0) & (beam_norm > 0)] = 99   # Some direct daylight: x/0 = large -> completely clear, should be >11 for last row of Table 1
         epsilon[dif_horiz > 0] = (dif_horiz[dif_horiz > 0] + beam_norm[dif_horiz > 0]) / dif_horiz[dif_horiz > 0]  # Overcast: epsilon ~ 1,  clear: epsilon -> infinity
     
     
     # Table 1:
     f11=0;  f12=1;  f13=2;  f21=3; f22=4; f23=5
     
-    if(arrSize == 1):  # Scalar
-        if(epsilon <= 1.056):
+    if arrSize == 1:  # Scalar
+        if epsilon <= 1.056:
             F = [-0.011,  0.748, -0.080, -0.048,  0.073, -0.024]
-        elif(epsilon <= 1.253):
+        elif epsilon <= 1.253:
             F = [-0.038,  1.115, -0.109, -0.023,  0.106, -0.037]
-        elif(epsilon <= 1.586):
+        elif epsilon <= 1.586:
             F = [ 0.166,  0.909, -0.179,  0.062, -0.021, -0.050]
-        elif(epsilon <= 2.134):
+        elif epsilon <= 2.134:
             F = [ 0.419,  0.646, -0.262,  0.140, -0.167, -0.042]
-        elif(epsilon <= 3.230):
+        elif epsilon <= 3.230:
             F = [ 0.710,  0.025, -0.290,  0.243, -0.511, -0.004]
-        elif(epsilon <= 5.980):
+        elif epsilon <= 5.980:
             F = [ 0.857, -0.370, -0.279,  0.267, -0.792,  0.076]
-        elif(epsilon <= 10.080):
+        elif epsilon <= 10.080:
             F = [ 0.734, -0.073, -0.228,  0.231, -1.180,  0.199]
         else:
             F = [ 0.421, -0.661,  0.097,  0.119, -2.125,  0.446]
             
-        zeta = pio2 - sun_alt  # Zenith angle = pi/2 - sun_alt
+        zeta = pio2 - sun_alt                             # Zenith angle = pi/2 - sun_alt
         F1 = F[f11]  +  F[f12] * Delta  +  F[f13] * zeta  # Circumsolar brightness coefficient
         F2 = F[f21]  +  F[f22] * Delta  +  F[f23] * zeta  # Horizon brightness coefficient
         
@@ -364,7 +366,7 @@ def diffuse_radiation_projection_perez87(doy, sun_alt, surf_incl, theta, beam_no
         F[ (epsilon >  5.980) & (epsilon <= 10.080), :]  =  [ 0.734, -0.073, -0.228,  0.231, -1.180,  0.199]
         F[ (epsilon > 10.080), :                      ]  =  [ 0.421, -0.661,  0.097,  0.119, -2.125,  0.446]
         
-        zeta = pio2 - sun_alt  # Zenith angle = pi/2 - sun_alt
+        zeta = pio2 - sun_alt                                      # Zenith angle = pi/2 - sun_alt
         F1 = F[:, f11]  +  F[:, f12] * Delta  +  F[:, f13] * zeta  # Circumsolar brightness coefficient
         F2 = F[:, f21]  +  F[:, f22] * Delta  +  F[:, f23] * zeta  # Horizon brightness coefficient
     
@@ -379,8 +381,8 @@ def diffuse_radiation_projection_perez87(doy, sun_alt, surf_incl, theta, beam_no
     # Solid angle of the circumsolar region weighted by incidence on the HORIZONTAL (variable C, subscript H;
     #   see Nomenclature, under c):
     # psiH:
-    if(arrSize == 1):  # Scalar
-        if(zeta > pio2 - alpha):
+    if arrSize == 1:  # Scalar
+        if zeta > pio2 - alpha:
             psiH = 0.5 * (pio2 - zeta + alpha) / alpha  # Dimensionless ratio
         else:
             psiH = 1
@@ -389,13 +391,13 @@ def diffuse_radiation_projection_perez87(doy, sun_alt, surf_incl, theta, beam_no
         psiH[zeta > pio2 - alpha] = 0.5 * (pio2 - zeta[zeta > pio2 - alpha] + alpha) / alpha  # Dimensionless ratio
     
     # chiH:
-    if(arrSize == 1):  # Scalar
-        if(zeta < pio2 - alpha):
+    if arrSize == 1:  # Scalar
+        if zeta < pio2 - alpha:
             chiH = np.cos(zeta)  # = np.sin(sun_alt)
         else:
             chiH = psiH * np.sin(psiH*alpha)
     else:  # Array
-        chiH = np.cos(zeta)  # = np.sin(sun_alt)
+        chiH = np.cos(zeta)      # = np.sin(sun_alt)
         chiH[zeta >= pio2 - alpha] = psiH[zeta >= pio2 - alpha] * np.sin(psiH[zeta >= pio2 - alpha] * alpha)
     
     C = 2 * (1 - np.cos(alpha)) * chiH  # Solid angle of the circumsolar region, weighted by HORIZONTAL incidence
@@ -407,10 +409,10 @@ def diffuse_radiation_projection_perez87(doy, sun_alt, surf_incl, theta, beam_no
     psiC = 0.5 * (pio2 - theta + alpha) / alpha
     
     # chiC:
-    if(arrSize == 1):  # Scalar
-        if(theta < pio2 - alpha):
+    if arrSize == 1:  # Scalar
+        if theta < pio2 - alpha:
             chiC = psiH * np.cos(theta)
-        elif(theta < pio2 + alpha):
+        elif theta < pio2 + alpha:
             chiC = psiH * psiC * np.sin(psiC*alpha)
         else:
             chiC = 0
