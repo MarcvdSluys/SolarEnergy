@@ -6,6 +6,7 @@ Submodules
 
 .. toctree::
 
+   solarenergy.solar_panels
    solarenergy.radiation
 
 Module contents

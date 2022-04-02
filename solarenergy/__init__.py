@@ -37,3 +37,4 @@ Information on the theory behind this code can be found in the document
 name = 'solarenergy'
 
 from .radiation import *
+from .solar_panels import *
