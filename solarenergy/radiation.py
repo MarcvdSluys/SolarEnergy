@@ -109,7 +109,7 @@ def sun_position_from_datetime(geo_lon,geo_lat, date_time, debug=False):
         date_time = date_time[np.newaxis]  # Convert scalar to 1D array
         scalar_input = True
     
-    utcs = date_time  # NOT TRUE???  Numpy arrays are timezone-naive, and MUST be provided as UTC
+    utcs = date_time  # NOT TRUE???  Numpy arrays are timezone-naive since v1.11 (https://numpy.org/doc/stable/reference/arrays.datetime.html), and MUST be provided as UTC
     
     azimuth         = np.array([])
     altitude        = np.array([])
@@ -127,7 +127,6 @@ def sun_position_from_datetime(geo_lon,geo_lat, date_time, debug=False):
     
     
     if debug:
-        r2d = 180/np.pi  # Convert radians to degrees
         print('Location:  %0.3lf E, %0.3lf N'  % (st.geo_longitude*r2d, st.geo_latitude*r2d))
         print('Date:      %4d %2d %2d'         % (st.year, st.month, st.day))
         print('Time:      %2d %2d %9.6lf'      % (st.hour, st.minute, st.second))
@@ -475,11 +474,10 @@ def clearsky_bird(sun_alt, i_ext=1353,sun_dist=1, press=1013,  uo=0.34,uw=1.42, 
     Returns:
       tuple (float,float,float,float):  Tuple containing (i_tot, i_dir, i_dif, i_gr):
         
-      - i_tot  (float):  Total insolation on a horizontal surface (W/m^2)
-      - i_dir  (float):  Direct (beam) insolation on a horizontal surface (W/m^2)
-      - i_dif  (float):  Diffuse insolation on a horizontal surface (W/m^2)
+      - i_tot  (float):  Total (global) insolation on a horizontal surface (GHI; W/m^2)
+      - i_dir  (float):  Direct (beam) insolation on a horizontal surface (BHI; W/m^2)
+      - i_dif  (float):  Diffuse insolation on a horizontal surface (DHI; W/m^2)
       - i_gr   (float):  Ground-reflection insolation from a horizontal surface (W/m^2)
-      
     """
     
     Z = pio2 - sun_alt  # Solar zenith angle
