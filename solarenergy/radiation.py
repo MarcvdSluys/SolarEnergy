@@ -205,8 +205,8 @@ def extinction_factor(airmass, return_value_below_horizon=False):
                                              when the Sun is lower.  This can be useful for solvers.  Default: False.
     
     Returns: 
-        float: The extinciton factor for sunlight in the atmosphere.  Divide the extraterrestrial (AM)
-               radiation (or, if unknown, solar constant) by this number to obtain the DNI.
+        float: The extinciton factor for sunlight in the atmosphere.  Divide the extraterrestrial (AM0)
+               radiation (or, if unknown, the solar constant) by this number to obtain the DNI.
     
     """
     
@@ -519,7 +519,7 @@ def diffuse_radiation_from_global_radiation_and_sunshine(glob_horiz, sun_frac, s
       glob_horiz (float):  Global horizontal radiation (W/m2).
       sun_frac   (float):  Fraction of sunshine (e.g. fraction of cloud cover) (-; 0-1).
       sun_alt    (float):  Sun altitude above the horizon (rad).
-      i_ext      (float):  Extraterrestrial radiation (W/m2).  Defaults to solar constant.
+      i_ext      (float):  Extraterrestrial radiation (W/m2).  Defaults to the solar constant.
     
     Returns:
       tuple (float,float,float):  Tuple containing (dif_horiz, beam_horiz, beam_norm):
