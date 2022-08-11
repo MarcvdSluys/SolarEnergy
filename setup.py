@@ -1,4 +1,4 @@
-#!/bin/env python3
+#!/bin/env python
 # -*- coding: utf-8 -*-
 
 """Setup.py for the SolarEnergy Python package."""
@@ -25,7 +25,7 @@ setup(
     long_description_content_type='text/markdown',
     
     version=version,
-    license='GPLv3+',
+    license='EUPL 1.2',
     keywords=['solar energy','solar','energy','sun'],
     
     classifiers=[
@@ -33,7 +33,7 @@ setup(
         'Intended Audience :: Developers',
         'Intended Audience :: Education',
         'Intended Audience :: Science/Research',
-        'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
+        'License :: OSI Approved :: European Union Public Licence 1.2 (EUPL 1.2)',
         'Natural Language :: English',
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 3',

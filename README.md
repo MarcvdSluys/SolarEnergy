@@ -5,13 +5,12 @@
 [![Code check](https://github.com/MarcvdSluys/SolarEnergy/actions/workflows/code-check.yml/badge.svg)](https://github.com/MarcvdSluys/SolarEnergy/actions/workflows/code-check.yml)
 [![Documentation
 Status](https://readthedocs.org/projects/solarenergy/badge/?version=latest)](https://solarenergy.readthedocs.io/en/latest/?badge=latest)
-![PyPI - License](https://img.shields.io/pypi/l/solarenergy?color=%230A0)
+![PyPI - Licence](https://img.shields.io/pypi/l/solarenergy?color=%230A0)
 
-A Python module to do simple modelling in the field of solar energy.  The code is being developed by [Marc
-van der Sluys](http://han.vandersluys.nl/en/) of the department of astrophysics of the Radboud University
-Nijmegen, the Netherlands and the department of Sustainable energy of the HAN University of Applied Sciences
-in Arnhem, the Netherlands.  The SolarEnergy package can be used under the conditions of the GPLv3
-licence.
+A Python module to do simple modelling in the field of solar energy.  The code is being developed by [Marc van
+der Sluys](http://marc.vandersluys.nl) of the department of astrophysics of the Radboud University Nijmegen,
+the Netherlands and the department of Sustainable energy of the HAN University of Applied Sciences in Arnhem,
+the Netherlands.  The SolarEnergy package can be used under the conditions of the EUPL 1.2 licence.
 
 
 ## Installation ##
@@ -88,8 +87,8 @@ print()
 ## Author and licence ##
 
 * Author: Marc van der Sluys
-* Contact: http://han.vandersluys.nl/en/
-* Licence: [GPLv3+](https://www.gnu.org/licenses/gpl.html)
+* Contact: http://marc.vandersluys.nl
+* Licence: [EUPL 1.2](https://www.eupl.eu/1.2/en/)
 
 
 ## References ##
