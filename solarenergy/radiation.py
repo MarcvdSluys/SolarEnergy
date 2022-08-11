@@ -26,7 +26,6 @@
 
 References:
   - Marc van der Sluys, Celestial mechanics in a nutshell, https://cmians.sourceforge.io (2014-2022).
-      
 """
 
 
@@ -81,7 +80,7 @@ def sun_position_from_date_and_time(geo_lon,geo_lat, year,month,day, hour,minute
 
 
 
-def sun_position_from_datetime(geo_lon,geo_lat, date_time, debug=False):
+def sun_position_from_datetime(geo_lon,geo_lat, date_time, utc=False, debug=False):
     """Compute the Sun local position (azimuth, altitude and distance) for the given geographical location and
     a Python datetime using SolTrack.
     
@@ -91,10 +90,11 @@ def sun_position_from_datetime(geo_lon,geo_lat, date_time, debug=False):
     
         date_time (datetime):  Date and time to compute the Sun position for (timezone aware and/or UTC, i.e. must be UTC if timezone naive.  CHECK: must be UTC if a list or (numpy) array?).
         
+        utc (bool):            Specify that the input is in UTC.  This can speed up calls with a single datetime (as opposed to arrays).  Defaults to False.
         debug (bool):          Switch to write detailed output to stdout (optional; default = False).
     
     Returns:
-        tuple (float,float,float):  Tuple containing (azimuth, altitude, distance):
+        tuple (float,float,float):  Tuple containing (arrays of) (azimuth, altitude, distance):
     
             - azimuth  (float):  Azimuth of the Sun (rad; south = 0 on the northern hemisphere).
             - altitude (float):  Altitude of the Sun (rad).
@@ -105,45 +105,25 @@ def sun_position_from_datetime(geo_lon,geo_lat, date_time, debug=False):
     from soltrack import SolTrack
     st = SolTrack(geo_lon,geo_lat, computeRefrEquatorial=False)  # No need for equatorial coordinates
     
-    date_time = np.asarray(date_time)
-    scalar_input = False
-    if date_time.ndim == 0:
-        date_time = date_time[np.newaxis]  # Convert scalar to 1D array
-        scalar_input = True
+    # Set date and time:
+    st.setDateTime(date_time, utc=utc)
     
-    utcs = date_time  # NOT TRUE???  Numpy arrays are timezone-naive since v1.11 (https://numpy.org/doc/stable/reference/arrays.datetime.html), and MUST be provided as UTC
-    
-    azimuth         = np.array([])
-    altitude        = np.array([])
-    distance        = np.array([])
-    
-    # Use a loop until we find a better solution:
-    for utc in utcs:
-        st.setDateTime(utc)   # Set the date and time
-        st.computePosition()  # Compute the Sun's position
-        
-        azimuth         = np.append(azimuth, st.azimuth)
-        altitude        = np.append(altitude, st.altitude)
-        distance        = np.append(distance, st.distance)
-    
+    # Compute the Sun's position:
+    st.computePosition()
     
     
     if debug:
-        print('Location:  %0.3lf E, %0.3lf N'  % (st.geo_longitude*r2d, st.geo_latitude*r2d))
-        print('Date:      %4d %2d %2d'         % (st.year, st.month, st.day))
-        print('Time:      %2d %2d %9.6lf'      % (st.hour, st.minute, st.second))
-        print('JD:        %0.11lf'             % (st.julianDay))
+        print('Location:  ', st.geoLongitude*r2d, st.geoLatitude*r2d)
+        print('Date/time: ', date_time)
+        print('JD:        ', st.julianDay)
         print()
         
-        print('Corrected azimuth, altitude:  %10.6lf° %10.6lf°' % (st.azimuth*r2d, st.altitude*r2d))
-        print('Distance:                     %10.6lf AU'        % (st.distance))
+        print('Azimuth:   ', st.azimuth*r2d)
+        print('Altitude:  ', st.altitude*r2d)
+        print('Distance:  ', st.distance)
         print()
-    
-    
-    if scalar_input:
-        return np.asscalar(azimuth), np.asscalar(altitude), np.asscalar(distance)
-    
-    return azimuth, altitude, distance
+        
+    return st.azimuth, st.altitude, st.distance
 
 
 
