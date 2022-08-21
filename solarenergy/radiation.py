@@ -190,7 +190,7 @@ def airmass(sun_alt, return_value_below_horizon=False):
     airmass[sel] = np.maximum(airmass[sel], 1)  # Air mass cannot be lower than 1
     
     if scalar_input:
-        return np.asscalar(airmass)
+        return np.ndarray.item(airmass)
     
     return airmass
 
@@ -240,7 +240,7 @@ def extinction_factor(airmass, return_value_below_horizon=False):
     ext_fac[sel] = np.exp(ext[sel])
     
     if scalar_input:
-        return np.asscalar(ext_fac)
+        return np.ndarray.item(ext_fac)
     
     return ext_fac
 
