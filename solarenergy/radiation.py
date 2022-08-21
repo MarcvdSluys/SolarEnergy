@@ -103,13 +103,13 @@ def sun_position_from_datetime(geo_lon,geo_lat, date_time, utc=False, debug=Fals
     
     # Create a SolTrack instance for the desired location and specify preferences:
     from soltrack import SolTrack
-    st = SolTrack(geo_lon,geo_lat, computeRefrEquatorial=False)  # No need for equatorial coordinates
+    st = SolTrack(geo_lon,geo_lat, compute_refr_equatorial=False)  # No need for equatorial coordinates
     
     # Set date and time:
-    st.setDateTime(date_time, utc=utc)
+    st.set_date_time(date_time, utc=utc)
     
     # Compute the Sun's position:
-    st.computePosition()
+    st.compute_position()
     
     
     if debug:
