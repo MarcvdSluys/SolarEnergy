@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 """
 See:
@@ -13,9 +14,9 @@ current_dir = Path(current_file).parent.absolute()
 root_dir = current_dir.parent
 sys.path.insert(0, str(root_dir))
 
-print(f"current_file: {current_file}")
-print(f"current_dir: {current_dir}")
-print(f"root_dir: {root_dir}")
+print(f'current_file: {current_file}')
+print(f'current_dir: {current_dir}')
+print(f'root_dir: {root_dir}')
 print()
 [print(p) for p in sys.path]
 

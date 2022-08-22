@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 # import context  # to use local solarenergy package
 
@@ -7,14 +8,14 @@ import pytz
 import solarenergy as se
 
 
-from pvlib.solarposition import get_solarposition, nrel_earthsun_distance
-from pvlib.atmosphere import get_relative_airmass, alt2pres, get_absolute_airmass
+from pvlib.solarposition import get_solarposition  # , nrel_earthsun_distance
+from pvlib.atmosphere import get_relative_airmass  # , alt2pres  # , get_absolute_airmass
 from pvlib.irradiance import get_extra_radiation
 
 import matplotlib.pyplot as plt
 import matplotlib
 
-matplotlib.use("Qt5Agg")
+matplotlib.use('Qt5Agg')
 
 
 def test_extinction():
@@ -34,7 +35,7 @@ def test_positions():
     """VALIDATION of solar position calculations in solarenergy
        comparison against PVLIB get_solarposition()
     """
-    nl_tz = pytz.timezone("Europe/Amsterdam")
+    nl_tz = pytz.timezone('Europe/Amsterdam')
     times2020 = pd.date_range(start='2019-01-01 00:00:00', end='2019-12-31 23:00:00',
                               freq='H', tz=nl_tz)
 
@@ -61,16 +62,16 @@ def test_positions():
                     markerfacecolor='none', markeredgecolor='g', markersize=4)
     pv_style = dict(linestyle='none', marker='.',
                     markerfacecolor='r', markeredgecolor='r', markersize=3)
-    ax[0].set_ylabel('Azimuth [$\degree$]')
+    ax[0].set_ylabel(r'Azimuth [$\degree$]')
     ax[0].plot(times2020, pos_pv['azimuth'], label='PVLIB basic', **pv_style)
     ax[0].plot(times2020, np.rad2deg(sunAz) + 180.0, label='SE', **se_style)
 
-    ax[1].set_ylabel('Altitude/apparent elevation [$\degree$]')
+    ax[1].set_ylabel(r'Altitude/apparent elevation [$\degree$]')
     ax[1].plot(times2020, pos_pv['apparent_elevation'], **pv_style)
     ax[1].plot(times2020, np.rad2deg(sunAlt), **se_style)
 
     # ax[2].plot(times2020, pos1['equation_of_time'])
-    ax[2].set_ylabel('Difference [$\degree$]')
+    ax[2].set_ylabel(r'Difference [$\degree$]')
     ax[2].plot(times2020, diff_az, label='diff azimuth', **pv_style)
     ax[2].plot(times2020, diff_elev, label='diff alt', **se_style)
 
@@ -81,6 +82,7 @@ def test_positions():
     plt.suptitle('Validation of SE.sun_position_from_datetime \n'
                  'vs. PVLIB.get_solarposition (apparent_elevation)')
     plt.show()
+    
 
 def test_extra_and_airmass():
     """
@@ -88,7 +90,7 @@ def test_extra_and_airmass():
     Returns:
 
     """
-    nl_tz = pytz.timezone("Europe/Amsterdam")
+    nl_tz = pytz.timezone('Europe/Amsterdam')
     times2020 = pd.date_range(start='2019-01-01 00:00:00', end='2019-12-31 23:00:00',
                               freq='H', tz=nl_tz)
 
@@ -129,8 +131,7 @@ def test_extra_and_airmass():
     plt.show()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     test_extinction()
     test_positions()
     test_extra_and_airmass()
-
