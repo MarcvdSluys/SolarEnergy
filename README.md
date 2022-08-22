@@ -10,9 +10,9 @@ Status](https://readthedocs.org/projects/solarenergy/badge/?version=latest)](htt
 A Python module to do simple modelling in the field of solar energy.  The code is being developed by [Marc van
 der Sluys](http://marc.vandersluys.nl) of the department of astrophysics of the Radboud University Nijmegen,
 the Netherlands and the department of Sustainable energy of the HAN University of Applied Sciences in Arnhem,
-the Netherlands.[^Nikhef] The SolarEnergy package can be used under the conditions of the EUPL 1.2 licence.
-[^Nikhef]: Now at the Netherlands Institute for Nuclear and High-Energy Physics (Nikhef) and the Institute for
-	Gravitational and Subatomic Physics (GRASP) at Utrecht University in the Netherlands.
+the Netherlands, now at the Netherlands Institute for Nuclear and High-Energy Physics (Nikhef) and the
+Institute for Gravitational and Subatomic Physics (GRASP) at Utrecht University in the Netherlands. The
+SolarEnergy package can be used under the conditions of the EUPL 1.2 licence.
 
 
 ## Installation
