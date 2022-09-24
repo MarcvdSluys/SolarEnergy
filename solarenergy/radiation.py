@@ -245,7 +245,7 @@ def extinction_factor(airmass, return_value_below_horizon=False):
     return ext_fac
 
 
-def diffuse_radiation_projection_perez87(doy, sun_alt, surf_incl, theta, beam_norm, dif_horiz):
+def diffuse_radiation_projection_perez87(doy, sun_alt, surf_incl, theta, beam_norm, dif_horiz, return_components=False):
     """Compute diffuse radiation on an inclined surface using the 1987 Perez model
     
     This function is adapted from the libTheSky Fortran implementation (libthesky.sf.net).
@@ -264,9 +264,17 @@ def diffuse_radiation_projection_perez87(doy, sun_alt, surf_incl, theta, beam_no
       
       beam_norm (float):   Beam (direct) normal radiation = DNI (W/m2; in the direction of the Sun, may be an array)
       dif_horiz (float):   Diffuse radiation on a horizontal surface = DHI (W/m2, may be an array)
+
+      return_components (bool):  Return circumsolar and horizon parts separately (i.e., three return values).
       
     Returns:
-      float:    Diffuse irradiation on the inclined surface (W/m2) (may be an array)
+      float:    Diffuse irradiation on the inclined surface (W/m2) (may be an array) - if return_components=False
+    
+      tuple:    Diffuse irradiation + components as (float1, float2, float3), may be arrays - if return_components=True:
+
+                - float1:    Total diffuse irradiation on the inclined surface (W/m2)
+                - float2:    Circumsolar diffuse irradiation on the inclined surface (W/m2)
+                - float3:    Horizon-band diffuse irradiation on the inclined surface (W/m2)
       
     """
     
@@ -415,10 +423,10 @@ def diffuse_radiation_projection_perez87(doy, sun_alt, surf_incl, theta, beam_no
     diff_incl     = diff_incl_csl + diff_incl_hzl
     
     # Assign optional return values:
-    # if(present(diff_incl_cs)) diff_incl_cs = diff_incl_csl
-    # if(present(diff_incl_hz)) diff_incl_hz = diff_incl_hzl
-    
-    return diff_incl
+    if return_components:
+        return diff_incl, diff_incl_csl, diff_incl_hzl
+    else:
+        return diff_incl
 
 
 def clearsky_bird(sun_alt, i_ext=1353,sun_dist=1, press=1013,  uo=0.34,uw=1.42, ta5=0.2661,ta3=0.3538,ba=0.84,k1=0.1, rg=0.2):
