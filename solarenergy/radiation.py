@@ -507,14 +507,14 @@ def clearsky_bird(sun_alt, i_ext=1353,sun_dist=1, press=1013,  uo=0.34,uw=1.42, 
     tmpVar = i_ext * cosZ  *  To * Tum * Tw  # Save a few CPU cycles
     i_dir = 0.9662 * tmpVar  *  Tr * Ta  /  np.square(sun_dist)
     
-    # Diffuse (scattered) radiation on a horizontal surface:
+    # Diffuse (atmosphere-scattered) radiation on a horizontal surface:
     i_dif  = 0.79 *  tmpVar        * Taa *  (0.5*(1-Tr) + ba*(1-Tas)) / (1 - AM + AM**1.02)
     
-    # Total (direct+diffuse) radiation on a horizontal surface:
+    # Total (direct + diffuse + ground->sky scattered) radiation on a horizontal surface:
     i_tot = (i_dir+i_dif) / (1 - rg*Rs)
     
-    # Ground-reflected radiation from a horizontal surface:
-    i_gr  = i_tot - (i_dir+i_dif)
+    # MvdS: add ground-reflected radiation from a horizontal surface:
+    i_gr  = (i_dir+i_dif)*rg
     
     return i_tot, i_dir, i_dif, i_gr
 
