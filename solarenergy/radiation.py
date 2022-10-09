@@ -544,6 +544,91 @@ def diffuse_radiation_from_global_radiation_and_sunshine(glob_horiz, sun_frac, s
     return dif_horiz, beam_horiz, beam_norm
 
 
+def reflectance_transmittance(ang_i, n_ref1,n_ref2, comp_transmittance=False,comp_polarised=False):
+    """Compute the reflectance and transmittance as function of incidence angle and refactive indices.
+    
+    Compute the reflectance for the transition from a medium with refractive index n_ref1 to one with n_ref2,
+    under an incidence angle ang_i.  Optionally, compute the transmittance, and the polarised components.  The
+    media are assumed to be non-magnetic.
+    
+    Parameters:
+      ang_i  (float):  Angle of incidence (rad).
+      n_ref1 (float):  Refractive index of initial medium (-).
+      n_ref2 (float):  Refractive index of second medium (-).
+    
+      comp_transmittance (bool):  Compute and return the transmittance and its angle.
+      comp_polarised (bool):      Compute and return the polarised reflectances and transmittances.
+    
+    Returns:
+      (tuple):  Tuple consisting of one or more values, depending on the input parameters:
+                
+                comp_transmittance=False, comp_polarised=False:  (r_unp);
+                comp_transmittance=False, comp_polarised=True:   (r_unp, r_prp,r_par);
+                comp_transmittance=True, comp_polarised=False:   (r_unp, t_unp, ang_t);
+                comp_transmittance=True, comp_polarised=True:    (r_unp, t_unp, ang_t,  r_prp,r_par,
+                                                                  t_prp,t_par);
+                
+                With the following variables:
+                  r_unp (float):   Unpolarised reflectance (-);
+                  
+                  t_unp (float):   Unpolarised transmittance (-);
+                  ang_t (float):   Angle of transmittance (rad);
+                  
+                  r_prp (float):   Perpendicular polarised reflectance (-);
+                  r_par (float):   Parallel polarised reflectance (-);
+                  t_prp (float):   Perpendicular polarised transmittance (-);
+                  t_par (float):   Parallel polarised transmittance (-).
+    
+    See:
+      - libSUFR, optics.f90: libsufr.sf.net
+      - Hecht, Optics, 3rd Ed. (1998), p.113ff
+      - https://en.wikipedia.org/wiki/Fresnel_equations#Power_or_intensity_equations
+    """
+    
+    var = n_ref1/n_ref2 * np.sin(ang_i)  # Argument for Snell's law
+    
+    # Default values (for total internal reflection):
+    r_prp = np.ones_like(ang_i)
+    r_par = np.ones_like(ang_i)
+    ang_t = np.zeros_like(ang_i)
+    
+    SEL = (var <= 1) & (np.abs(ang_i) <= pio2)  # Selection of no total internal reflection and a valid input value
+    ang_t[SEL] = np.arcsin(var[SEL])            # Angle of transmittance - Snell's law
+    
+    # Reuse variables:
+    cos_ang_i = np.cos(ang_i)
+    cos_ang_t = np.cos(ang_t)
+    
+    r_prp[SEL] = np.square( (n_ref1 * cos_ang_i[SEL] - n_ref2 * cos_ang_t[SEL]) /
+                            (n_ref1 * cos_ang_i[SEL] + n_ref2 * cos_ang_t[SEL]) )
+    r_par[SEL] = np.square( (n_ref1 * cos_ang_t[SEL] - n_ref2 * cos_ang_i[SEL]) /
+                            (n_ref1 * cos_ang_t[SEL] + n_ref2 * cos_ang_i[SEL]) )
+    
+    
+    # Unpolarised reflectance:
+    r_unp = 0.5 * (r_prp + r_par)
+    
+    # Assign optional return values:
+    t_unp = 1 - r_unp
+    t_prp = 1 - r_prp
+    t_par = 1 - r_par
+    
+    # print(ang_i, var, SEL, r_prp,r_par, r_unp)
+    
+    # Number of return values depends on input parameters:
+    if comp_transmittance:
+        if comp_polarised:
+            return r_unp, t_unp, ang_t,  r_prp,r_par, t_prp,t_par
+        else:
+            return r_unp, t_unp, ang_t
+        
+    else:  # No transmittance
+        if comp_polarised:
+            return r_unp, r_prp,r_par
+        else:
+            return r_unp
+            
+
 # Obsolescent function aliases; wrapers around new functions for now, remove later.
 def computeSunPos(geo_lon,geo_lat, year,month,day, hour,minute=0,second=0, timezone='UTC', debug=False):
     """Obsolete version of sun_position_from_date_and_time().  Use that function instead!"""
