@@ -562,11 +562,11 @@ def reflectance_transmittance(ang_i, n_ref1,n_ref2, comp_transmittance=False,com
     Returns:
       (tuple):  Tuple consisting of one or more values, depending on the input parameters:
                 
-                comp_transmittance=False, comp_polarised=False:  (r_unp);
-                comp_transmittance=False, comp_polarised=True:   (r_unp, r_prp,r_par);
-                comp_transmittance=True, comp_polarised=False:   (r_unp, t_unp, ang_t);
-                comp_transmittance=True, comp_polarised=True:    (r_unp, t_unp, ang_t,  r_prp,r_par,
-                                                                  t_prp,t_par);
+                - comp_transmittance=False, comp_polarised=False:  (r_unp);
+                - comp_transmittance=False, comp_polarised=True:   (r_unp, r_prp,r_par);
+                - comp_transmittance=True, comp_polarised=False:   (r_unp, t_unp, ang_t);
+                - comp_transmittance=True, comp_polarised=True:    (r_unp, t_unp, ang_t,  r_prp,r_par,
+                                                                   t_prp,t_par);
                 
                 With the following variables:
                   r_unp (float):   Unpolarised reflectance (-);
