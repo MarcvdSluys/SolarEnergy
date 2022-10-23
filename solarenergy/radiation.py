@@ -69,6 +69,7 @@ def sun_position_from_date_and_time(geo_lon,geo_lat, year,month,day, hour,minute
     # Create a timezone-aware datetime object:
     import datetime as dt
     import pytz as tz
+    
     myTZ   = tz.timezone(timezone)   # My timezone
     myTime = dt.datetime(int(year),int(month),int(day), int(hour),int(minute),int(second))  # Timezone-naive time
     lt     = myTZ.localize(myTime, is_dst=None)  # Mark as local time
@@ -628,6 +629,144 @@ def reflectance_transmittance(ang_i, n_ref1,n_ref2, comp_transmittance=False,com
         else:
             return r_unp
             
+
+
+def solar_power_from_clear_sky(sp, dat, warn=True):
+    """Model to compute the electrical power for a given solar-panel system and Sun position(s) for a clear sky.
+    
+    Args:
+      sp (se.SolarPanels):  struct containing solar-panel data, including the elements:
+                              - sp.az (float):  azimuth (rad; same as df['sun_az']  (default S=0, W=pi/2));
+                              - sp.incl (float):  inclunation (rad; horizontal=0, vertical=pi/2);
+                              - sp.eff0 (float):  original PV+inverter efficiency at determined T (e.g. 20°C) (fraction; 0-1);
+                              - sp.year (int):  year of installation (e.g. 2015);
+                              - sp.deff_dt (float):  change in PV efficiency (dη/dt; year^-1, <0);
+                              - sp.t_coef (float):  PV temperature coefficient (K^-1);
+                              - sp.n_refr (float):  panel refractive index (>1; ~1.43);
+                              - sp.area (float):  PV area (m^2);
+                              - sp.p_max (float):  maximum power of solar-panel system (W).
+    
+      dat (pd.DataFrame):   Pandas DataFrame containing solar-panel and weather data, including the columns:
+                              - df['dtm'] (datetime):  Date and time;
+                              - df['sun_az'] (float):  Sun azimuth (rad; same as sp.az (default S=0, W=pi/2));
+                              - df['sun_alt'] (float):  Sun altitude (rad);
+                              - df['sun_dist'] (float):  Sun distance (AU);
+                              - df['press'] (float):  air pressure (mbar);
+                              - df['temp'] (float):  ambient air temperature (°C);
+                              - df['ws'] (float):  wind speed (m/s).
+                            More columns with intermediate results will be added during the calculation.
+                            The final result will be added as a column named 'Pclrsky', as well as returned
+                            as an array.
+    
+      warn (bool):          Warn if a parameter or variable is missing and the default value is used (defaults to True).
+    
+    Returns:
+        float:  Array containing predicted electrical power of solar panels for a clear sky (kW).  Note that
+                this result is ALSO added to the input DataFrame, as a column named 'Pclrsky'.
+    """
+    
+    import astrotool as at
+    from .solar_panels import pv_cell_temperature, pv_efficiency
+    
+    # Check for necessary solar-panel specs/se.SolarPanels struct elements in sp:
+    import sys
+    if not hasattr(sp, 'az'): print('Works!')
+    
+    if not hasattr(sp, 'az'):
+        sys.stderr.write('SolarEnergy: '+__name__+': ERROR: solar-panel parameter az (azimuth) is undefined, aborting.\n')
+        exit(1)
+    if not hasattr(sp, 'incl'):
+        sys.stderr.write('SolarEnergy: '+__name__+': ERROR: solar-panel parameter incl (inclination) is undefined, aborting.\n')
+        exit(1)
+    if not hasattr(sp, 'area'):
+        sys.stderr.write('SolarEnergy: '+__name__+': ERROR: solar-panel parameter area (panel surface area) is undefined, aborting.\n')
+        exit(1)
+    if not hasattr(sp, 'p_max'):
+        sys.stderr.write('SolarEnergy: '+__name__+': ERROR: solar-panel parameter p_max (maximum power) is undefined, aborting.\n')
+        exit(1)
+        
+    if not hasattr(sp, 'eff0'):
+        sys.stderr.write('SolarEnergy: '+__name__+': ERROR: solar-panel parameter eff0 (original efficiency) is undefined, aborting.\n')
+        exit(1)
+        
+    if not hasattr(sp, 'year'):
+        if warn: sys.stderr.write('SolarEnergy: '+__name__+': Warning: solar-panel parameter year (year of installation) is undefined, ignoring degradation.\n')
+        sp.year = 2015
+        sp.deff_dt = 0.
+    if not hasattr(sp, 'deff_dt'):
+        if warn: sys.stderr.write('SolarEnergy: '+__name__+': Warning: solar-panel parameter deff_dt (efficiency degradation) is undefined, ignoring degradation.\n')
+        sp.year = 2015
+        sp.deff_dt = 0.
+        
+    if not hasattr(sp, 't_coef'):
+        if warn: sys.stderr.write('SolarEnergy: '+__name__+': Warning: solar-panel parameter t_coef (temperature coefficient) is undefined, ignoring temperature effects.\n')
+        sp.t_coef = 0
+    if not hasattr(sp, 'n_refr'):
+        if warn: sys.stderr.write('SolarEnergy: '+__name__+': Warning: solar-panel parameter n_refr (refractive index) is undefined, using a default value.\n')
+        sp.n_refr = 1.43
+        
+    # Check for necessary DataFrame columns in dat:
+    import sys
+    if 'sun_dist' not in dat:
+        if warn: sys.stderr.write('SolarEnergy: '+__name__+': Warning: data column sun_dist (Sun distance) is undefined, setting it to 1 AU.\n')
+        dat['sun_dist'] = 1
+    if 'press' not in dat:
+        if warn: sys.stderr.write('SolarEnergy: '+__name__+': Warning: data column press (air pressure) is undefined, setting it to 1010 mbar.\n')
+        dat['press'] = 1010
+    if 'temp' not in dat:
+        if warn: sys.stderr.write('SolarEnergy: '+__name__+': Warning: data column temp (air temperature) is undefined, setting it to 15°C.\n')
+        dat['temp'] = 15
+    if 'ws' not in dat:
+        if warn: sys.stderr.write('SolarEnergy: '+__name__+': Warning: data column ws (wind speed) is undefined, setting it to 3 m/s.\n')
+        dat['ws'] = 3
+        
+    if 'dtm' not in dat:
+        sys.stderr.write('SolarEnergy: '+__name__+': ERROR: data column dtm (date and time) is undefined, aborting.\n')
+        exit(1)
+    if 'sun_az' not in dat:
+        sys.stderr.write('SolarEnergy: '+__name__+': ERROR: data column sun_az (Sun azimuth) is undefined, aborting.\n')
+        exit(1)
+    if 'sun_alt' not in dat:
+        sys.stderr.write('SolarEnergy: '+__name__+': ERROR: data column sun_alt (Sun altitude) is undefined, aborting.\n')
+        exit(1)
+    
+    # Extraterrestrial radiation:
+    dat['Iext']      = sol_const / dat.sun_dist**2         # Extraterrestrial radiation = solar constant, scaled with distance
+    
+    # Compute extinction for clear sky using Bird:
+    dat['GHI'],dat['BHI'],dat['DHI'],dat['Igr'] = clearsky_bird(dat.sun_alt, dat.Iext, dat.sun_dist, dat.press)
+    dat['DNI'] = np.maximum(dat.BHI/np.sin(dat.sun_alt),0)
+    
+    # Compute direct radiation on panels:
+    dat['meanDNI']   = dat.DNI                                                         # Mean DNI for the current hour - no clouds
+    dat['cosTheta']  = cos_angle_sun_panels(sp.az,sp.incl, dat.sun_az,dat.sun_alt)  # Cosine of angle between Sun and solar panel normal vector
+    dat['theta']     = np.arccos(dat.cosTheta)
+    dat['dirRad']    = dat.meanDNI * np.maximum(dat.cosTheta, 0)                       # Mean DNI, projected on panels = direct radiation on solar panels
+    
+    dat['transmit']  = 1-reflectance_transmittance(dat.theta, 1.000293, sp.n_refr)  # Transmittance
+    dat['transmit']  = dat.transmit / (1-reflectance_transmittance(0., 1.000293, sp.n_refr))  # Normalised transmittance note dot in 0.!
+    dat['dirRad']    = dat.dirRad * dat.transmit                                       # Transmitted direct radiation
+    
+    # Projection of diffuse radiation on solar panels:
+    dat['doy']          = at.doy_from_datetime(dat.dtm)
+    totDif,csDif,horDif = diffuse_radiation_projection_perez87(dat.doy, dat.sun_alt, sp.incl, dat.theta, dat.DNI, dat.DHI, return_components=True)
+    dat['difRad']       = np.maximum(csDif * dat.transmit + horDif, 0)  # Take into account reflection of circumsolar diffuse radiation
+    dat['grRad']        = dat.Igr * (1 - np.cos(sp.incl))/2             # Ultra-simple model for ground-reflected radiation on panels
+    
+    
+    # Compute total radiation:
+    dat['totRad']    = dat.dirRad + dat.difRad + dat.grRad  # W/m**2
+    
+    # Compute the solar-panel power from the total radiation:
+    dat['Tcell']     = pv_cell_temperature(dat.temp, dat.totRad, dat.ws)  # PV-cell temperature from T_amb, insolation and wind speed
+    dat['dyear']     = dat.dtm.dt.year + at.doy_from_datetime(dat.dtm)/365.2425
+    eff              = sp.eff0 + (dat.dyear-sp.year)*sp.deff_dt
+    dat['eff']       = pv_efficiency(dat.Tcell, eff, sp.t_coef)
+    dat['Pclrsky']   = dat.totRad/1000 * sp.area * dat.eff
+    dat['Pclrsky']   = np.minimum(dat.Pclrsky, sp.p_max)  # Cannot produce more than (inverter) maximum (kW)
+    
+    return dat.Pclrsky
+
 
 # Obsolescent function aliases; wrapers around new functions for now, remove later.
 def computeSunPos(geo_lon,geo_lat, year,month,day, hour,minute=0,second=0, timezone='UTC', debug=False):

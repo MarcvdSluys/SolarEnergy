@@ -50,7 +50,7 @@ class SolarPanels:
     area:     float =    0.0;  """Surface area of solar PV panels (m2; typically 1.6m2 per panel)"""
     p_max:    float =    0.0;  """Maximum electrical power of solar PV panels or inverter (kW)"""
     
-    eff0:     float =    0.0;  """Original efficiency of solar panels, at installation (0-1; e.g. 0.15 for 15%)"""
+    eff0:     float =    0.0;  """Original efficiency of solar panels + inverter, at installation (0-1; e.g. 0.15 for 15%)"""
     deff_dt:  float =    0.0;  """Linear degradation of efficiency factor over time (yr^-1; -5e-3: degrades to 90% after 20 years)"""
     year:     float =   2015;  """Installation year (e.g. 2015.25 for 2015-04-01)"""
     
