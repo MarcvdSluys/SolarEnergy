@@ -654,6 +654,7 @@ def solar_power_from_clear_sky(sp, dat, warn=True):
                               - df['press'] (float):  air pressure (mbar);
                               - df['temp'] (float):  ambient air temperature (°C);
                               - df['ws'] (float):  wind speed (m/s).
+                            
                             More columns with intermediate results will be added during the calculation.
                             The final result will be added as a column named 'Pclrsky', as well as returned
                             as an array.
