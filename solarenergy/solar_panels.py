@@ -39,18 +39,23 @@ class SolarPanels:
     """Dataclass containing solar-panel parameters."""
     
     # Geographic location of the solar panels:
-    geo_lon:  float = 0.0;  """Geographic longitude of the panels (rad; >0 for northern hemisphere)"""
-    geo_lat:  float = 0.0;  """Geographic latitude of the panels (rad; >0 for east of Greenwich)"""
+    geo_lon:  float =    0.0;  """Geographic longitude of the panels (rad; >0 for northern hemisphere)"""
+    geo_lat:  float =    0.0;  """Geographic latitude of the panels (rad; >0 for east of Greenwich)"""
     
     # Orientation of the solar panels:
-    az:       float = 0.0;  """'Azimuth' of the panel normal vector  (rad; 0=S, π/2=W)"""
-    incl:     float = 0.0;  """'Zenith angle' of the panel normal vector  (rad; 0=horizontal, π/2=vertical)"""
+    az:       float =    0.0;  """'Azimuth' of the panel normal vector  (rad; 0=S, π/2=W)"""
+    incl:     float =    0.0;  """'Zenith angle' of the panel normal vector  (rad; 0=horizontal, π/2=vertical)"""
     
     # Size and capacity of the solar panels:
-    area:     float = 0.0;  """Surface area of solar panels (m2)"""
-    eff:      float = 0.0;  """Efficiency of solar panels (0-1)"""
-    t_coef:   float = 0.0;  """PV temperature coefficient (/K; typically -0.005)"""
-    p_max:    float = 0.0;  """Maximum electrical power of solar panels or inverter (W)"""
+    area:     float =    0.0;  """Surface area of solar PV panels (m2; typically 1.6m2 per panel)"""
+    p_max:    float =    0.0;  """Maximum electrical power of solar PV panels or inverter (kW)"""
+    
+    eff0:     float =    0.0;  """Original efficiency of solar panels, at installation (0-1; e.g. 0.15 for 15%)"""
+    deff_dt:  float =    0.0;  """Linear degradation of efficiency factor over time (yr^-1; -5e-3: degrades to 90% after 20 years)"""
+    year:     float =   2015;  """Installation year (e.g. 2015.25 for 2015-04-01)"""
+    
+    t_coef:   float = -0.005;  """PV temperature coefficient (/K; typically -0.005)"""
+    n_refr:   float =   1.43;  """Refractive index of PV cover (typically 1.43; air: 1.000293)"""
     
 
 def pv_cell_temperature(temp_a, glob_insol, v_wind,  temp_c_noct=45, eta_c_noct=0.15, t_coef=-0.0045, glob_insol_noct=800, temp_a_noct=20, v_wind_noct=1, tau_alp=0.9):
