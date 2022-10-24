@@ -266,20 +266,20 @@ def diffuse_radiation_projection_perez87(doy, sun_alt, surf_incl, theta, beam_no
       beam_norm (float):   Beam (direct) normal radiation = DNI (W/m2; in the direction of the Sun, may be an array)
       dif_horiz (float):   Diffuse radiation on a horizontal surface = DHI (W/m2, may be an array)
 
-      return_components (bool):  Return circumsolar and horizon parts separately (i.e., three return values).
+      return_components (bool):  Return isotropic, circumsolar and horizon parts separately (i.e., four return values).
       
     Returns:
       float:    Diffuse irradiation on the inclined surface (W/m2) (may be an array) - if return_components=False
     
-      tuple:    Diffuse irradiation + components as (float1, float2, float3), may be arrays - if return_components=True:
+      tuple:    Diffuse irradiation + components as (float1, float2, float3, float4), may be arrays - if return_components=True:
 
                 - float1:    Total diffuse irradiation on the inclined surface (W/m2)
-                - float2:    Circumsolar diffuse irradiation on the inclined surface (W/m2)
-                - float3:    Horizon-band diffuse irradiation on the inclined surface (W/m2)
-      
+                - float2:    Isotropic diffuse irradiation on the inclined surface (W/m2)
+                - float3:    Circumsolar diffuse irradiation on the inclined surface (W/m2)
+                - float4:    Horizon-band diffuse irradiation on the inclined surface (W/m2)
     """
     
-    # *** Compute the brightness coefficients for the circumsolar (F1) and horizon (F2) regions ***
+    # *** Compute the brightness coefficients for the isotropic (F1), circumsolar (F1) and horizon (F2) regions ***
     
     arrSize = np.size(sun_alt)  # Size (length) of the 1D numpy arrays (1 if no arrays)
     
@@ -341,7 +341,7 @@ def diffuse_radiation_projection_perez87(doy, sun_alt, surf_incl, theta, beam_no
             F = [ 0.421, -0.661,  0.097,  0.119, -2.125,  0.446]
             
         zeta = pio2 - sun_alt                             # Zenith angle = pi/2 - sun_alt
-        F1 = F[f11]  +  F[f12] * Delta  +  F[f13] * zeta  # Circumsolar brightness coefficient
+        F1 = F[f11]  +  F[f12] * Delta  +  F[f13] * zeta  # Isotropic, circumsolar brightness coefficient
         F2 = F[f21]  +  F[f22] * Delta  +  F[f23] * zeta  # Horizon brightness coefficient
         
     else:  # Array
@@ -356,7 +356,7 @@ def diffuse_radiation_projection_perez87(doy, sun_alt, surf_incl, theta, beam_no
         F[ (epsilon > 10.080), :                      ]  =  [ 0.421, -0.661,  0.097,  0.119, -2.125,  0.446]
         
         zeta = pio2 - sun_alt                                      # Zenith angle = pi/2 - sun_alt
-        F1 = F[:, f11]  +  F[:, f12] * Delta  +  F[:, f13] * zeta  # Circumsolar brightness coefficient
+        F1 = F[:, f11]  +  F[:, f12] * Delta  +  F[:, f13] * zeta  # Isotropic, circumsolar brightness coefficient
         F2 = F[:, f21]  +  F[:, f22] * Delta  +  F[:, f23] * zeta  # Horizon brightness coefficient
     
     
@@ -415,17 +415,16 @@ def diffuse_radiation_projection_perez87(doy, sun_alt, surf_incl, theta, beam_no
     
     
     
-    # Diffuse radiation from circumsolar (F1) and horizon (F2) regions on the inclined surface (Eq.8):
-    diff_incl_csl = dif_horiz * ( 0.5 * (1 + np.cos(surf_incl)) * (1 - F1)  +  F1 * A/C )  # Circumsolar
-    diff_incl_hzl = dif_horiz * ( F2 * np.sin(surf_incl) )                                 # Horizon band
+    # Diffuse radiation from isotropic (F1), circumsolar (F1) and horizon (F2) regions on the inclined surface (Eq.8):
+    diff_incl_iso = dif_horiz * 0.5 * (1 + np.cos(surf_incl)) * (1 - F1)  # Isotropic
+    diff_incl_csl = dif_horiz * F1 * A/C                                  # Circumsolar
+    diff_incl_hzl = dif_horiz * F2 * np.sin(surf_incl)                    # Horizon band
     
-    diff_incl_csl = np.maximum(diff_incl_csl, 0)  # Components are sometimes negative
-    diff_incl_hzl = np.maximum(diff_incl_hzl, 0)
-    diff_incl     = diff_incl_csl + diff_incl_hzl
+    diff_incl     = np.maximum(diff_incl_iso + diff_incl_csl + diff_incl_hzl, 0)  # Note: components may be negative!
     
     # Assign optional return values:
     if return_components:
-        return diff_incl, diff_incl_csl, diff_incl_hzl
+        return diff_incl, diff_incl_iso, diff_incl_csl, diff_incl_hzl
     else:
         return diff_incl
 
@@ -750,8 +749,8 @@ def solar_power_from_clear_sky(sp, dat, warn=True):
     
     # Projection of diffuse radiation on solar panels:
     dat['doy']          = at.doy_from_datetime(dat.dtm)
-    totDif,csDif,horDif = diffuse_radiation_projection_perez87(dat.doy, dat.sun_alt, sp.incl, dat.theta, dat.DNI, dat.DHI, return_components=True)
-    dat['difRad']       = np.maximum(csDif * dat.transmit + horDif, 0)  # Take into account reflection of circumsolar diffuse radiation
+    totDif,isoDif,csDif,horDif = diffuse_radiation_projection_perez87(dat.doy, dat.sun_alt, sp.incl, dat.theta, dat.DNI, dat.DHI, return_components=True)
+    dat['difRad']       = np.maximum(isoDif + csDif * dat.transmit + horDif, 0)  # Take into account reflection of circumsolar diffuse radiation
     dat['grRad']        = dat.Igr * (1 - np.cos(sp.incl))/2             # Ultra-simple model for ground-reflected radiation on panels
     
     
