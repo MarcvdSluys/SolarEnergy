@@ -635,24 +635,24 @@ def solar_power_from_clear_sky(sp, dat, warn=True):
     
     Args:
       sp (se.SolarPanels):  struct containing solar-panel data, including the elements:
-                              - sp.az (float):  azimuth (rad; same as df['sun_az']  (default S=0, W=pi/2));
-                              - sp.incl (float):  inclunation (rad; horizontal=0, vertical=pi/2);
-                              - sp.eff0 (float):  original PV+inverter efficiency at determined T (e.g. 20°C) (fraction; 0-1);
-                              - sp.year (int):  year of installation (e.g. 2015);
-                              - sp.deff_dt (float):  change in PV efficiency (dη/dt; year^-1, <0);
-                              - sp.t_coef (float):  PV temperature coefficient (K^-1);
-                              - sp.n_refr (float):  panel refractive index (>1; ~1.43);
-                              - sp.area (float):  PV area (m^2);
-                              - sp.p_max (float):  maximum power of solar-panel system (W).
+                              - sp.az      (float):  azimuth (rad; same as df['sun_az']  (default S=0, W=pi/2));
+                              - sp.incl    (float):  inclunation (rad; horizontal=0, vertical=pi/2);
+                              - sp.eff0    (float):  original PV+inverter efficiency at determined T (e.g. 20°C) (fraction; 0-1);
+                              - sp.year    (int):    year of installation (defaults to 2015);
+                              - sp.deff_dt (float):  change in PV efficiency (dη/dt; year^-1, <0; defaults to 0);
+                              - sp.t_coef  (float):  PV temperature coefficient (K^-1; defaults to 0);
+                              - sp.n_refr  (float):  panel refractive index (>1; defaults to 1.43);
+                              - sp.area    (float):  PV area (m^2);
+                              - sp.p_max   (float):  maximum power of solar-panel system (W).
     
       dat (pd.DataFrame):   Pandas DataFrame containing solar-panel and weather data, including the columns:
-                              - df['dtm'] (datetime):  Date and time;
-                              - df['sun_az'] (float):  Sun azimuth (rad; same as sp.az (default S=0, W=pi/2));
-                              - df['sun_alt'] (float):  Sun altitude (rad);
-                              - df['sun_dist'] (float):  Sun distance (AU);
-                              - df['press'] (float):  air pressure (mbar);
-                              - df['temp'] (float):  ambient air temperature (°C);
-                              - df['ws'] (float):  wind speed (m/s).
+                              - df['dtm']      (datetime):  Date and time;
+                              - df['sun_az']   (float):     Sun azimuth (rad; same as sp.az (default S=0, W=pi/2));
+                              - df['sun_alt']  (float):     Sun altitude (rad);
+                              - df['sun_dist'] (float):     Sun distance (AU; defaults to 1);
+                              - df['press']    (float):     air pressure (mbar; defaults to 1010);
+                              - df['temp']     (float):     ambient air temperature (°C; defaults to 15);
+                              - df['ws']       (float):     wind speed (m/s; defaults to 3).
                             
                             More columns with intermediate results will be added during the calculation.
                             The final result will be added as a column named 'Pclrsky', as well as returned
