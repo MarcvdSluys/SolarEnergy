@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # SPDX-License-Identifier: EUPL-1.2
 #  
-#  Copyright (c) 2020-2022  Marc van der Sluys - marc.vandersluys.nl
+#  Copyright (c) 2020-2023  Marc van der Sluys - marc.vandersluys.nl
 #   
 #  This file is part of the SolarEnergy Python package, containing a Python module to do simple modelling in
 #  the field of solar energy.  See: https://github.com/MarcvdSluys/SolarEnergy

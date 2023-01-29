@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # SPDX-License-Identifier: EUPL-1.2
 #  
-#  Copyright (c) 2020-2022  Marc van der Sluys - marc.vandersluys.nl
+#  Copyright (c) 2020-2023  Marc van der Sluys - marc.vandersluys.nl
 #  
 #  This file is part of the SolarEnergy Python package, containing a Python module to do simple modelling in
 #  the field of solar energy.  See: https://github.com/MarcvdSluys/SolarEnergy
@@ -50,13 +50,71 @@ class SolarPanels:
     area:     float =    0.0;  """Surface area of solar PV panels (m2; typically 1.6m2 per panel)"""
     p_max:    float =    0.0;  """Maximum electrical power of solar PV panels or inverter (kW)"""
     
+    # Time dependence of efficiency:
     eff0:     float =    0.0;  """Original efficiency of solar panels + inverter, at installation (0-1; e.g. 0.15 for 15%)"""
     deff_dt:  float =    0.0;  """Linear degradation of efficiency factor over time (yr^-1; -5e-3: degrades to 90% after 20 years)"""
     year:     float =   2015;  """Installation year (e.g. 2015.25 for 2015-04-01)"""
     
+    # Other parameters: temperature and angle dependence:
     t_coef:   float = -0.005;  """PV temperature coefficient (/K; typically -0.005)"""
     n_refr:   float =   1.43;  """Refractive index of PV cover (typically 1.43; air: 1.000293)"""
     
+
+def read_solar_panel_specs(cfg_file='.solar_panels.cfg', rel_to_home=True, to_rad=True):
+    """Read solar-panel specifications from a configuration file.
+    
+    Parameters:
+      cfg_file (str):      Configuration file to read specs from (by default relative to home directory).
+      rel_to_home (bool):  File path/name is relative to home directory.
+      to_rad (bool):       Convert angles from degrees to radians (location, orientation).
+    
+    Returns:
+      (SolarPanels):  Dataclass of type SolarPanels containing the specifications.
+    """
+    
+    sp = SolarPanels()
+    
+    
+    # Read configuration file:
+    import configparser
+    config = configparser.ConfigParser()
+    if rel_to_home:
+        from pathlib import Path as _Path
+        config.read(str(_Path.home())+'/'+cfg_file)
+    else:
+        config.read(str(cfg_file))
+    
+    # Section Geographic location of the solar panels:
+    sp.geo_lon  = config.getfloat('Location', 'geo_lon')         # Geographic longitude of the panels (rad; >0 for northern hemisphere)
+    sp.geo_lat  = config.getfloat('Location', 'geo_lat')         # Geographic latitude of the panels (rad; >0 for east of Greenwich)
+    
+    # Section Orientation of the solar panels:
+    sp.az       = config.getfloat('Orientation', 'az')           # 'Azimuth' of the panel normal vector  (rad; 0=S, π/2=W)
+    sp.incl     = config.getfloat('Orientation', 'incl')         # 'Zenith angle' of the panel normal vector  (rad; 0=horizontal, π/2=vertical)
+    
+    # Section Size and capacity of the solar panels:
+    sp.area     =  config.getfloat('Capacity', 'area')           # Surface area of solar PV panels (m2; typically 1.6m2 per panel)
+    sp.p_max    =  config.getfloat('Capacity', 'p_max')          # Maximum electrical power of solar PV panels or inverter (kW)
+    
+    # Section Time dependence of efficiency:
+    sp.eff0     =  config.getfloat('TimeDependence', 'eff0')     # Original efficiency of solar panels + inverter, at installation (0-1; e.g. 0.15 for 15%)
+    sp.deff_dt  =  config.getfloat('TimeDependence', 'deff_dt')  # Linear degradation of efficiency factor over time (yr^-1; -5e-3: degrades to 90% after 20 years)
+    sp.year     =  config.getfloat('TimeDependence', 'year')     # Installation year (e.g. 2015.25 for 2015-04-01)
+    
+    # Section Other parameters: temperature and angle dependence:
+    sp.t_coef   =  config.getfloat('Other', 't_coef')            # PV temperature coefficient (/K; typically -0.005)
+    sp.n_refr   =  config.getfloat('Other', 'n_refr')            # Refractive index of PV cover (typically 1.43; air: 1.000293)
+    
+    if to_rad:
+        from astroconst import d2r
+        sp.geo_lon *= d2r
+        sp.geo_lat *= d2r
+        
+        sp.az   *= d2r
+        sp.incl *= d2r
+        
+    return sp
+
 
 def pv_cell_temperature(temp_a, glob_insol, v_wind,  temp_c_noct=45, eta_c_noct=0.15, t_coef=-0.0045, glob_insol_noct=800, temp_a_noct=20, v_wind_noct=1, tau_alp=0.9):
     """Estimate the PV-cell temperature as a function of ambient temperature, insolation and wind velocity.
