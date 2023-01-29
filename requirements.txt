@@ -1,5 +1,5 @@
 astroconst==0.0.6
 astrotool==0.0.9
 numpy
-pytz==2022.4
-soltrack==0.2.1
+pytz==2022.6
+soltrack==0.2.3

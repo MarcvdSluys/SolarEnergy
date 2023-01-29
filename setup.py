@@ -4,7 +4,7 @@
 """Setup.py for the SolarEnergy Python package."""
 
 # Package version:
-version='0.1.5'
+version='0.1.6'
 
 # Get long description from README.md:
 with open('README.md', 'r') as fh:
@@ -19,7 +19,7 @@ setup(
     url='https://github.com/MarcvdSluys/SolarEnergy',
     
     packages=['solarenergy'],
-    install_requires=['astroconst>=0.0.5','numpy','pytz','soltrack>=0.2.0'],
+    install_requires=['astroconst>=0.0.6','astrotool>=0.0.9','numpy','pytz','soltrack>=0.2.0'],
     long_description=long_description,
     long_description_content_type='text/markdown',
     
