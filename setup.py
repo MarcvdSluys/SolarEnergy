@@ -4,7 +4,7 @@
 """Setup.py for the SolarEnergy Python package."""
 
 # Package version:
-version='0.1.6'
+version='0.1.7'
 
 # Get long description from README.md:
 with open('README.md', 'r') as fh:
