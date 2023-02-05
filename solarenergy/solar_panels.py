@@ -78,34 +78,37 @@ def read_solar_panel_specs(cfg_file='.solar_panels.cfg', rel_to_home=True, to_ra
     
     # Read configuration file:
     import configparser
-    config = configparser.ConfigParser()
+    config = configparser.ConfigParser(inline_comment_prefixes=('#'))  # Allow inline comments
     if rel_to_home:
         from pathlib import Path as _Path
         config.read(str(_Path.home())+'/'+cfg_file)
     else:
         config.read(str(cfg_file))
     
+    # Use fallback to allow missing sections and keys, and use the default values instead.
+    
     # Section Geographic location of the solar panels:
-    sp.geo_lon  = config.getfloat('Location', 'geo_lon')         # Geographic longitude of the panels (rad; >0 for northern hemisphere)
-    sp.geo_lat  = config.getfloat('Location', 'geo_lat')         # Geographic latitude of the panels (rad; >0 for east of Greenwich)
-    sp.tz       = config.get('Location',     'timezone')         # Timezone where the solar panels sit (e.g. Europe/Paris)
+    sp.geo_lon  = config.getfloat('Location', 'geo_lon', fallback=sp.geo_lon)         # Geographic longitude of the panels (rad; >0 for northern hemisphere)
+    sp.geo_lat  = config.getfloat('Location', 'geo_lat', fallback=sp.geo_lat)         # Geographic latitude of the panels (rad; >0 for east of Greenwich)
+    sp.tz       = config.get('Location',     'timezone', fallback=sp.tz)              # Timezone where the solar panels sit (e.g. Europe/Paris)
     
     # Section Orientation of the solar panels:
-    sp.az       = config.getfloat('Orientation', 'az')           # 'Azimuth' of the panel normal vector  (rad; 0=S, π/2=W)
-    sp.incl     = config.getfloat('Orientation', 'incl')         # 'Zenith angle' of the panel normal vector  (rad; 0=horizontal, π/2=vertical)
+    sp.az       = config.getfloat('Orientation', 'az',   fallback=sp.az)              # 'Azimuth' of the panel normal vector  (rad; 0=S, π/2=W)
+    sp.incl     = config.getfloat('Orientation', 'incl', fallback=sp.incl)            # 'Zenith angle' of the panel normal vector  (rad; 0=horizontal, π/2=vertical)
     
     # Section Size and capacity of the solar panels:
-    sp.area     =  config.getfloat('Capacity', 'area')           # Surface area of solar PV panels (m2; typically 1.6m2 per panel)
-    sp.p_max    =  config.getfloat('Capacity', 'p_max')          # Maximum electrical power of solar PV panels or inverter (kW)
+    sp.area     =  config.getfloat('Capacity', 'area',   fallback=sp.area)            # Surface area of solar PV panels (m2; typically 1.6m2 per panel)
+    sp.p_max    =  config.getfloat('Capacity', 'p_max',  fallback=sp.p_max)           # Maximum electrical power of solar PV panels or inverter (kW)
     
     # Section Time dependence of efficiency:
-    sp.eff0     =  config.getfloat('TimeDependence', 'eff0')     # Original efficiency of solar panels + inverter, at installation (0-1; e.g. 0.15 for 15%)
-    sp.deff_dt  =  config.getfloat('TimeDependence', 'deff_dt')  # Linear degradation of efficiency factor over time (yr^-1; -5e-3: degrades to 90% after 20 years)
-    sp.year     =  config.getfloat('TimeDependence', 'year')     # Installation year (e.g. 2015.25 for 2015-04-01)
+    sp.eff0     =  config.getfloat('TimeDependence', 'eff0',    fallback=sp.eff0)     # Original efficiency of solar panels + inverter, at installation (0-1; e.g. 0.15 for 15%)
+    sp.deff_dt  =  config.getfloat('TimeDependence', 'deff_dt', fallback=sp.deff_dt)  # Linear degradation of efficiency factor over time (yr^-1; -5e-3: degrades to 90% after 20 years)
+    sp.year     =  config.getfloat('TimeDependence', 'year',    fallback=sp.year)     # Installation year (e.g. 2015.25 for 2015-04-01)
     
     # Section Other parameters: temperature and angle dependence:
-    sp.t_coef   =  config.getfloat('Other', 't_coef')            # PV temperature coefficient (/K; typically -0.005)
-    sp.n_refr   =  config.getfloat('Other', 'n_refr')            # Refractive index of PV cover (typically 1.43; air: 1.000293)
+    sp.t_coef   =  config.getfloat('Other', 't_coef',  fallback=sp.t_coef)            # PV temperature coefficient (/K; typically -0.005)
+    sp.n_refr   =  config.getfloat('Other', 'n_refr',  fallback=sp.n_refr)            # Refractive index of PV cover (typically 1.43; air: 1.000293)
+    
     
     if to_rad:
         from astroconst import d2r
