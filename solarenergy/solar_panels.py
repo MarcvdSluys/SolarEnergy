@@ -60,6 +60,11 @@ class SolarPanels:
     t_coef:   float = -0.005;  """PV temperature coefficient (/K; typically -0.005)"""
     n_refr:   float =   1.43;  """Refractive index of PV cover (typically 1.43; air: 1.000293)"""
     
+    # Inverter model and serial number:
+    inv_model:  str =   None;  """Model or type of the inverter"""
+    inv_sn:     str =   None;  """Serial number of the inverter"""
+    name:       str =   None;  """PV plant name"""
+    
 
 def read_solar_panel_specs(cfg_file='.solar_panels.cfg', rel_to_home=True, to_rad=True):
     """Read solar-panel specifications from a configuration file.
@@ -108,6 +113,11 @@ def read_solar_panel_specs(cfg_file='.solar_panels.cfg', rel_to_home=True, to_ra
     # Section Other parameters: temperature and angle dependence:
     sp.t_coef   =  config.getfloat('Other', 't_coef',  fallback=sp.t_coef)            # PV temperature coefficient (/K; typically -0.005)
     sp.n_refr   =  config.getfloat('Other', 'n_refr',  fallback=sp.n_refr)            # Refractive index of PV cover (typically 1.43; air: 1.000293)
+    
+    # Section Inverter: model and serial number:
+    sp.inv_model =  config.get('Inverter', 'model',    fallback=sp.inv_model)         # Inverter model or type
+    sp.inv_sn    =  config.get('Inverter', 'sn',       fallback=sp.inv_sn)            # Inverter serial number
+    sp.name      =  config.get('Inverter', 'name',     fallback=sp.name)              # PV plant name
     
     
     if to_rad:
