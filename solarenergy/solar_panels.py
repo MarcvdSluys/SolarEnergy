@@ -41,6 +41,7 @@ class SolarPanels:
     # Geographic location of the solar panels:
     geo_lon:  float =    0.0;  """Geographic longitude of the panels (rad; >0 for northern hemisphere)"""
     geo_lat:  float =    0.0;  """Geographic latitude of the panels (rad; >0 for east of Greenwich)"""
+    tz:       str   =    None;  """Time zone where the solar panels sit (e.g. Europe/Berlin)"""
     
     # Orientation of the solar panels:
     az:       float =    0.0;  """'Azimuth' of the panel normal vector  (rad; 0=S, π/2=W)"""
@@ -87,6 +88,7 @@ def read_solar_panel_specs(cfg_file='.solar_panels.cfg', rel_to_home=True, to_ra
     # Section Geographic location of the solar panels:
     sp.geo_lon  = config.getfloat('Location', 'geo_lon')         # Geographic longitude of the panels (rad; >0 for northern hemisphere)
     sp.geo_lat  = config.getfloat('Location', 'geo_lat')         # Geographic latitude of the panels (rad; >0 for east of Greenwich)
+    sp.tz       = config.get('Location',     'timezone')         # Timezone where the solar panels sit (e.g. Europe/Paris)
     
     # Section Orientation of the solar panels:
     sp.az       = config.getfloat('Orientation', 'az')           # 'Azimuth' of the panel normal vector  (rad; 0=S, π/2=W)
