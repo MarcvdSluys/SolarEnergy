@@ -670,8 +670,6 @@ def solar_power_from_clear_sky(sp, dat, warn=True):
     
     # Check for necessary solar-panel specs/se.SolarPanels struct elements in sp:
     import sys
-    if not hasattr(sp, 'az'): print('Works!')
-    
     if not hasattr(sp, 'az'):
         sys.stderr.write('SolarEnergy: '+__name__+': ERROR: solar-panel parameter az (azimuth) is undefined, aborting.\n')
         exit(1)
@@ -743,8 +741,9 @@ def solar_power_from_clear_sky(sp, dat, warn=True):
     dat['theta']     = np.arccos(dat.cosTheta)
     dat['dirRad']    = dat.meanDNI * np.maximum(dat.cosTheta, 0)                       # Mean DNI, projected on panels = direct radiation on solar panels
     
-    dat['transmit']  = 1-reflectance_transmittance(dat.theta, 1.000293, sp.n_refr)  # Transmittance
-    dat['transmit']  = dat.transmit / (1-reflectance_transmittance(0., 1.000293, sp.n_refr))  # Normalised transmittance note dot in 0.!
+    # Compute transmittance of solar-panel cover:
+    dat['transmit']  = 1 - reflectance_transmittance(dat.theta, 1.000293, sp.n_refr)  # Transmittance
+    dat['transmit']  = dat.transmit / (1 - reflectance_transmittance(0., 1.000293, sp.n_refr))  # Normalised transmittance note dot in 0.!
     dat['dirRad']    = dat.dirRad * dat.transmit                                       # Transmitted direct radiation
     
     # Projection of diffuse radiation on solar panels:
