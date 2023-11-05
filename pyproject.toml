@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["solarenergy"]
+
+[project]
+name = "solarenergy"
+version = "0.1.8"
+authors = [ { name="Marc van der Sluys", email="git@vandersluys.nl" } ]
+description = "A Python module do simple modelling in the field of solar energy"
+readme   = "README.md"
+license  = {text = "EUPL 1.2"}
+keywords = ["solar energy","solar","energy","sun"]
+dependencies = ["astroconst>=0.0.6","astrotool>=0.0.9","numpy","pytz","soltrack>=0.2.0"]
+
+# See: https://pypi.org/pypi?:action=list_classifiers
+classifiers = [
+        "Development Status :: 4 - Beta",
+        "Intended Audience :: Developers",
+        "Intended Audience :: Education",
+        "Intended Audience :: Science/Research",
+        "License :: OSI Approved :: European Union Public Licence 1.2 (EUPL 1.2)",
+        "Natural Language :: English",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python :: 3",
+        "Topic :: Scientific/Engineering",
+        "Topic :: Scientific/Engineering :: Astronomy",
+        "Topic :: Scientific/Engineering :: Physics",
+    ]
+
+[project.urls]
+GitHub = "https://github.com/MarcvdSluys/SolarEnergy"
+ReadTheDocs = "https://solarenergy.readthedocs.io"
