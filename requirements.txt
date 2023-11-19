@@ -2,5 +2,4 @@ astroconst==0.0.10
 astrotool==0.0.12
 numpy==1.25.2
 pytz==2023.3
-pytz==2023.3.post1
 soltrack==0.2.5
