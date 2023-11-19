@@ -5,9 +5,22 @@
 # Required
 version: 2
 
-# Build documentation in the docs/ directory with Sphinx, and treat warnings as errors
+# Set the OS, Python version and other tools you might need
+build:
+  os: ubuntu-22.04
+  tools:
+    python: "3.10"
+    # You can also specify other tool versions:
+    # nodejs: "20"
+    # rust: "1.70"
+    # golang: "1.20"
+
+# Build documentation in the docs/ directory with Sphinx
 sphinx:
   configuration: docs/conf.py
+  # You can configure Sphinx to use a different builder, for instance use the dirhtml builder for simpler URLs
+  # builder: "dirhtml"
+  # Fail on all warnings to avoid broken references
   fail_on_warning: False
   
 # Build documentation with MkDocs
@@ -15,12 +28,16 @@ sphinx:
 #  configuration: mkdocs.yml
 
 # Optionally build your docs in additional formats such as PDF and ePub
-formats:
-  - pdf
+# formats:
+#   - pdf
+#   - epub
 
-# Optionally set the version of Python and requirements required to build your docs (e.g. soltrack, astrotool, ...)
-# system_packages: Give the virtual environment access to the global site-packages directory for e.g. numpy and scipy.
+# Optional but recommended, declare the Python requirements required
+# to build your documentation
+# See https://docs.readthedocs.io/en/stable/guides/reproducible-builds.html
+# (e.g. soltrack, astrotool, ...)
 python:
 #   version: 3.7
   install:
     - requirements: docs/requirements.txt
+
