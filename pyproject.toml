@@ -11,7 +11,7 @@ version = "0.1.9"
 authors = [ { name="Marc van der Sluys", email="git@vandersluys.nl" } ]
 description = "A Python module do simple modelling in the field of solar energy"
 readme   = "README.md"
-license  = {text = "EUPL 1.2"}
+license  = "EUPL-1.2"
 keywords = ["solar energy","solar","energy","sun"]
 dependencies = ["astroconst>=0.0.6","astrotool>=0.0.9","numpy","pytz","soltrack>=0.2.0"]
 
@@ -21,7 +21,6 @@ classifiers = [
         "Intended Audience :: Developers",
         "Intended Audience :: Education",
         "Intended Audience :: Science/Research",
-        "License :: OSI Approved :: European Union Public Licence 1.2 (EUPL 1.2)",
         "Natural Language :: English",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3",
