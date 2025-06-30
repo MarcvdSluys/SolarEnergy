@@ -7,7 +7,7 @@ packages = ["solarenergy"]
 
 [project]
 name = "solarenergy"
-version = "0.1.9"
+version = "0.1.10"
 authors = [ { name="Marc van der Sluys", email="git@vandersluys.nl" } ]
 description = "A Python module do simple modelling in the field of solar energy"
 readme   = "README.md"

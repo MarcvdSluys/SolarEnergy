@@ -1,7 +1,7 @@
 solarenergy
-astroconst==0.0.10
-astrotool==0.0.12
+astroconst==0.0.13
+astrotool==0.0.23
 numpy
-pytz==2023.3
-soltrack==0.2.5
+pytz==2025.2
+soltrack==0.3.1
 sphinx-rtd-theme
