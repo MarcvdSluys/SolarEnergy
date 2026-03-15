@@ -364,7 +364,7 @@ def diffuse_radiation_projection_perez87(doy, sun_alt, surf_incl, theta, beam_no
     
     # *** Compute the mean solid angles occupied by the circumsolar region (C and A, needed for Eq.8) ***
     
-    alpha = 25*d2r  # Half angle of the circumsolar region (degrees -> radians; below Eq.9)
+    alpha = 25*d2r  # Half angle (apparent radius) of the circumsolar region (degrees -> radians; below Eq.9)
     
     
     # Solid angle of the circumsolar region weighted by incidence on the HORIZONTAL (variable C, subscript H;
@@ -417,7 +417,7 @@ def diffuse_radiation_projection_perez87(doy, sun_alt, surf_incl, theta, beam_no
     
     # Diffuse radiation from isotropic (F1), circumsolar (F1) and horizon (F2) regions on the inclined surface (Eq.8):
     diff_incl_iso = dif_horiz * 0.5 * (1 + np.cos(surf_incl)) * (1 - F1)  # Isotropic
-    diff_incl_csl = dif_horiz * F1 * A/C                                  # Circumsolar
+    diff_incl_csl = dif_horiz * F1 * A/C                                  # Circumsolar - CHECK * cos(theta)?
     diff_incl_hzl = dif_horiz * F2 * np.sin(surf_incl)                    # Horizon band
     
     diff_incl     = np.maximum(diff_incl_iso + diff_incl_csl + diff_incl_hzl, 0)  # Note: components may be negative!
@@ -767,35 +767,35 @@ def solar_power_from_clear_sky(sp, dat, warn=True):
     return dat.Pclrsky
 
 
-# Obsolescent function aliases; wrapers around new functions for now, remove later.
-def computeSunPos(geo_lon,geo_lat, year,month,day, hour,minute=0,second=0, timezone='UTC', debug=False):
-    """Obsolete version of sun_position_from_date_and_time().  Use that function instead!"""
-    print('ERROR: computeSunPos() is an obsolete version of sun_position_from_date_and_time().  Use that function instead!')
-    exit(1)
+# # Obsolescent function aliases; wrapers around new functions for now, remove later.
+# def computeSunPos(geo_lon,geo_lat, year,month,day, hour,minute=0,second=0, timezone='UTC', debug=False):
+#     """Obsolete version of sun_position_from_date_and_time().  Use that function instead!"""
+#     print('ERROR: computeSunPos() is an obsolete version of sun_position_from_date_and_time().  Use that function instead!')
+#     exit(1)
 
 
-def cosAngleSunPanels(sp_az,sp_incl, sun_az,sun_alt):
-    """Obsolete version of cos_angle_sun_panels().  Use that function instead!"""
-    print('ERROR: cosAngleSunPanels() is an obsolete version of cos_angle_sun_panels().  Use that function instead!')
-    exit(1)
+# def cosAngleSunPanels(sp_az,sp_incl, sun_az,sun_alt):
+#     """Obsolete version of cos_angle_sun_panels().  Use that function instead!"""
+#     print('ERROR: cosAngleSunPanels() is an obsolete version of cos_angle_sun_panels().  Use that function instead!')
+#     exit(1)
 
 
-def extinctionFactor(airmass, return_value_below_horizon=False):
-    """Obsolete version of extinction_factor().  Use that function instead!"""
-    print('ERROR: extinctionFactor() is an obsolete version of extinction_factor().  Use that function instead!')
-    exit(1)
+# def extinctionFactor(airmass, return_value_below_horizon=False):
+#     """Obsolete version of extinction_factor().  Use that function instead!"""
+#     print('ERROR: extinctionFactor() is an obsolete version of extinction_factor().  Use that function instead!')
+#     exit(1)
 
 
-def diffuse_radiation_projection_Perez87(doy, alt, surf_incl, theta, beam_norm,dif_horiz):
-    """Obsolete version of diffuse_radiation_projection_perez87().  Use that function instead!"""
-    print('ERROR: diffuse_radiation_projection_Perez87() is an obsolete version of diffuse_radiation_projection_perez87().  Use that function instead!')
-    exit(1)
+# def diffuse_radiation_projection_Perez87(doy, alt, surf_incl, theta, beam_norm,dif_horiz):
+#     """Obsolete version of diffuse_radiation_projection_perez87().  Use that function instead!"""
+#     print('ERROR: diffuse_radiation_projection_Perez87() is an obsolete version of diffuse_radiation_projection_perez87().  Use that function instead!')
+#     exit(1)
 
 
-def diffuseRad_from_globalRad_sunshine(glob_horiz, sun_frac, sun_alt, i_ext=sol_const):
-    """Obsolete version of diffuse_radiation_from_global_radiation_and_sunshine().  Use that function instead!"""
-    print('ERROR: diffuseRad_from_globalRad_sunshine() is an obsolete version of diffuse_radiation_from_global_radiation_and_sunshine().  Use that function instead!')
-    exit(1)
+# def diffuseRad_from_globalRad_sunshine(glob_horiz, sun_frac, sun_alt, i_ext=sol_const):
+#     """Obsolete version of diffuse_radiation_from_global_radiation_and_sunshine().  Use that function instead!"""
+#     print('ERROR: diffuseRad_from_globalRad_sunshine() is an obsolete version of diffuse_radiation_from_global_radiation_and_sunshine().  Use that function instead!')
+#     exit(1)
     
 
 # Test code:
