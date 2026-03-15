@@ -38,32 +38,40 @@ from dataclasses import dataclass
 class SolarPanels:
     """Dataclass containing solar-panel parameters."""
     
+    # Base directories for solar panels and electricity meter:
+    sp_dir:       str   = str(None);  """Base directory for solar-panel code and data"""
+    el_dir:       str   = str(None);  """Base directory for electricity-meter code and data"""
+    
     # Geographic location of the solar panels:
-    geo_lon:  float =    0.0;  """Geographic longitude of the panels (rad; >0 for northern hemisphere)"""
-    geo_lat:  float =    0.0;  """Geographic latitude of the panels (rad; >0 for east of Greenwich)"""
-    tz:       str   =    None;  """Time zone where the solar panels sit (e.g. Europe/Berlin)"""
+    geo_lon_deg:  float =       0.0;  """Geographic longitude of the panels (deg; >0 for northern hemisphere)"""
+    geo_lat_deg:  float =       0.0;  """Geographic latitude of the panels (deg; >0 for east of Greenwich)"""
+    geo_lon:      float =       0.0;  """Geographic longitude of the panels (rad; >0 for northern hemisphere)"""
+    geo_lat:      float =       0.0;  """Geographic latitude of the panels (rad; >0 for east of Greenwich)"""
+    tz:           str   = str(None);  """Time zone where the solar panels sit (e.g. Europe/Berlin)"""
     
     # Orientation of the solar panels:
-    az:       float =    0.0;  """'Azimuth' of the panel normal vector  (rad; 0=S, π/2=W)"""
-    incl:     float =    0.0;  """'Zenith angle' of the panel normal vector  (rad; 0=horizontal, π/2=vertical)"""
+    az_deg:       float =       0.0;  """Azimuth of the panel normal vector, from the south  (deg; 0=S, 90=W)"""
+    incl_deg:     float =       0.0;  """Inclination (zenith angle) of the panel normal vector  (deg; 0=horizontal, 90=vertical)"""
+    az:           float =       0.0;  """Azimuth of the panel normal vector, from the south  (deg; 0=S, π/2=W)"""
+    incl:         float =       0.0;  """Inclination (zenith angle) of the panel normal vector  (deg; 0=horizontal, π/2=vertical)"""
     
     # Size and capacity of the solar panels:
-    area:     float =    0.0;  """Surface area of solar PV panels (m2; typically 1.6m2 per panel)"""
-    p_max:    float =    0.0;  """Maximum electrical power of solar PV panels or inverter (kW)"""
+    area:         float =       0.0;  """Surface area of solar PV panels (m2; typically 1.6m2 per panel)"""
+    p_max:        float =       0.0;  """Maximum electrical power of solar PV panels or inverter (kW)"""
     
     # Time dependence of efficiency:
-    eff0:     float =    0.0;  """Original efficiency of solar panels + inverter, at installation (0-1; e.g. 0.15 for 15%)"""
-    deff_dt:  float =    0.0;  """Linear degradation of efficiency factor over time (yr^-1; -5e-3: degrades to 90% after 20 years)"""
-    year:     float =   2015;  """Installation year (e.g. 2015.25 for 2015-04-01)"""
+    eff0:         float =       0.0;  """Original efficiency of solar panels + inverter, at installation (0-1; e.g. 0.15 for 15%)"""
+    deff_dt:      float =       0.0;  """Linear degradation of efficiency factor over time (yr^-1; -5e-3: degrades to 90% after 20 years)"""
+    year:         float =      2015;  """Installation year (e.g. 2015.25 for 2015-04-01)"""
     
     # Other parameters: temperature and angle dependence:
-    t_coef:   float = -0.005;  """PV temperature coefficient (/K; typically -0.005)"""
-    n_refr:   float =   1.43;  """Refractive index of PV cover (typically 1.43; air: 1.000293)"""
+    t_coef:       float =    -0.005;  """PV temperature coefficient (/K; typically -0.005)"""
+    n_refr:       float =      1.43;  """Refractive index of PV cover (typically 1.43; air: 1.000293)"""
     
     # Inverter model and serial number:
-    inv_model:  str =   None;  """Model or type of the inverter"""
-    inv_sn:     str =   None;  """Serial number of the inverter"""
-    name:       str =   None;  """PV plant name"""
+    inv_model:      str = str(None);  """Model or type of the inverter"""
+    inv_sn:         str = str(None);  """Serial number of the inverter"""
+    name:           str = str(None);  """PV plant name"""
     
 
 def read_solar_panel_specs(cfg_file='.solar_panels.cfg', rel_to_home=True, to_rad=True):
@@ -72,7 +80,7 @@ def read_solar_panel_specs(cfg_file='.solar_panels.cfg', rel_to_home=True, to_ra
     Parameters:
       cfg_file (str):      Configuration file to read specs from (by default relative to home directory).
       rel_to_home (bool):  File path/name is relative to home directory.
-      to_rad (bool):       Convert angles from degrees to radians (location, orientation).
+      to_rad (bool):       Obsolete: location and orientation are provided both in degrees and radians.  -  Convert angles from degrees to radians (location, orientation).
     
     Returns:
       (SolarPanels):  Dataclass of type SolarPanels containing the specifications.
@@ -80,26 +88,32 @@ def read_solar_panel_specs(cfg_file='.solar_panels.cfg', rel_to_home=True, to_ra
     
     sp = SolarPanels()
     
+    # Get home directory:
+    from pathlib import Path as _Path
+    homedir = str(_Path.home())
     
     # Read configuration file:
     import configparser
     config = configparser.ConfigParser(inline_comment_prefixes=('#'))  # Allow inline comments
     if rel_to_home:
-        from pathlib import Path as _Path
-        config.read(str(_Path.home())+'/'+cfg_file)
+        config.read(homedir+'/'+cfg_file)
     else:
         config.read(str(cfg_file))
     
     # Use fallback to allow missing sections and keys, and use the default values instead.
     
+    # Section Base directories for solar panels and electricity meter:
+    sp.sp_dir       = config.get(     'Directories', 'sp_dir',    fallback=sp.sp_dir).replace('~', homedir)  # Base directory for solar-panel code and data
+    sp.el_dir       = config.get(     'Directories', 'el_dir',    fallback=sp.el_dir).replace('~', homedir)  # Base directory for electricity-meter code and data
+    
     # Section Geographic location of the solar panels:
-    sp.geo_lon  = config.getfloat('Location', 'geo_lon', fallback=sp.geo_lon)         # Geographic longitude of the panels (rad; >0 for northern hemisphere)
-    sp.geo_lat  = config.getfloat('Location', 'geo_lat', fallback=sp.geo_lat)         # Geographic latitude of the panels (rad; >0 for east of Greenwich)
-    sp.tz       = config.get('Location',     'timezone', fallback=sp.tz)              # Timezone where the solar panels sit (e.g. Europe/Paris)
+    sp.geo_lon_deg  = config.getfloat('Location', 'geo_lon_deg', fallback=sp.geo_lon_deg)  # Geographic longitude of the panels (deg; >0 for northern hemisphere)
+    sp.geo_lat_deg  = config.getfloat('Location', 'geo_lat_deg', fallback=sp.geo_lat_deg)  # Geographic latitude of the panels (deg; >0 for east of Greenwich)
+    sp.tz           = config.get(     'Location', 'timezone',    fallback=sp.tz)           # Timezone where the solar panels sit (e.g. Europe/Paris)
     
     # Section Orientation of the solar panels:
-    sp.az       = config.getfloat('Orientation', 'az',   fallback=sp.az)              # 'Azimuth' of the panel normal vector  (rad; 0=S, π/2=W)
-    sp.incl     = config.getfloat('Orientation', 'incl', fallback=sp.incl)            # 'Zenith angle' of the panel normal vector  (rad; 0=horizontal, π/2=vertical)
+    sp.az_deg       = config.getfloat('Orientation', 'az_deg',   fallback=sp.az_deg)       # Azimuth of the panel normal vector  (deg; 0=S, 90=W)
+    sp.incl_deg     = config.getfloat('Orientation', 'incl_deg', fallback=sp.incl_deg)     # Inclination (zenith angle) of the panel normal vector  (deg; 0=horizontal, 90=vertical)
     
     # Section Size and capacity of the solar panels:
     sp.area     =  config.getfloat('Capacity', 'area',   fallback=sp.area)            # Surface area of solar PV panels (m2; typically 1.6m2 per panel)
@@ -120,14 +134,13 @@ def read_solar_panel_specs(cfg_file='.solar_panels.cfg', rel_to_home=True, to_ra
     sp.name      =  config.get('Inverter', 'name',     fallback=sp.name)              # PV plant name
     
     
-    if to_rad:
-        from astroconst import d2r
-        sp.geo_lon *= d2r
-        sp.geo_lat *= d2r
-        
-        sp.az   *= d2r
-        sp.incl *= d2r
-        
+    from astroconst import d2r as _d2r
+    sp.geo_lon = sp.geo_lon_deg * _d2r
+    sp.geo_lat = sp.geo_lat_deg * _d2r
+    
+    sp.az   = sp.az_deg * _d2r
+    sp.incl = sp.incl_deg * _d2r
+    
     return sp
 
 
