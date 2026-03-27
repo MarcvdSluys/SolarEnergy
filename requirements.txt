@@ -1,5 +1,5 @@
-astroconst==0.0.13
-astrotool==0.0.25
-numpy==2.3.2
+astroconst==0.0.14
+astrotool==0.0.26
+numpy==2.4.3
 pytz==2025.2
 soltrack==0.3.2

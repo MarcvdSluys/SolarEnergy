@@ -1,6 +1,6 @@
 solarenergy
-astroconst==0.0.13
-astrotool==0.0.25
+astroconst==0.0.14
+astrotool==0.0.26
 numpy
 pytz==2025.2
 soltrack==0.3.2
