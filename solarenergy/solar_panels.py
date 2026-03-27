@@ -38,10 +38,6 @@ from dataclasses import dataclass
 class SolarPanels:
     """Dataclass containing solar-panel parameters."""
     
-    # Base directories for solar panels and electricity meter:
-    sp_dir:       str   = str(None);  """Base directory for solar-panel code and data"""
-    el_dir:       str   = str(None);  """Base directory for electricity-meter code and data"""
-    
     # Geographic location of the solar panels:
     geo_lon_deg:  float =       0.0;  """Geographic longitude of the panels (deg; >0 for northern hemisphere)"""
     geo_lat_deg:  float =       0.0;  """Geographic latitude of the panels (deg; >0 for east of Greenwich)"""
@@ -101,10 +97,6 @@ def read_solar_panel_specs(cfg_file='.solar_panels.cfg', rel_to_home=True, to_ra
         config.read(str(cfg_file))
     
     # Use fallback to allow missing sections and keys, and use the default values instead.
-    
-    # Section Base directories for solar panels and electricity meter:
-    sp.sp_dir       = config.get(     'Directories', 'sp_dir',    fallback=sp.sp_dir).replace('~', homedir)  # Base directory for solar-panel code and data
-    sp.el_dir       = config.get(     'Directories', 'el_dir',    fallback=sp.el_dir).replace('~', homedir)  # Base directory for electricity-meter code and data
     
     # Section Geographic location of the solar panels:
     sp.geo_lon_deg  = config.getfloat('Location', 'geo_lon_deg', fallback=sp.geo_lon_deg)  # Geographic longitude of the panels (deg; >0 for northern hemisphere)
