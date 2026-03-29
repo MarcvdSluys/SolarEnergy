@@ -61,6 +61,7 @@ class SolarPanels:
     year:         float =      2015;  """Installation year (e.g. 2015.25 for 2015-04-01)"""
     
     # Other parameters: temperature and angle dependence:
+    noct:         float =        45;  """Nominal operating cell temperature (°C; typically 45)"""
     t_coef:       float =    -0.005;  """PV temperature coefficient (/K; typically -0.005)"""
     n_refr:       float =      1.43;  """Refractive index of PV cover (typically 1.43; air: 1.000293)"""
     
@@ -117,6 +118,7 @@ def read_solar_panel_specs(cfg_file='.solar_panels.cfg', rel_to_home=True, to_ra
     sp.year     =  config.getfloat('TimeDependence', 'year',    fallback=sp.year)     # Installation year (e.g. 2015.25 for 2015-04-01)
     
     # Section Other parameters: temperature and angle dependence:
+    sp.noct     =  config.getfloat('Other', 'noct',    fallback=sp.noct)              # Nominal operating cell temperature (typically ~45°C)
     sp.t_coef   =  config.getfloat('Other', 't_coef',  fallback=sp.t_coef)            # PV temperature coefficient (/K; typically -0.005)
     sp.n_refr   =  config.getfloat('Other', 'n_refr',  fallback=sp.n_refr)            # Refractive index of PV cover (typically 1.43; air: 1.000293)
     
