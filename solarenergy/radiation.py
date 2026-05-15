@@ -763,6 +763,7 @@ def solar_power_from_clear_sky(sp, dat, warn=True):
     dat['eff']       = pv_efficiency(dat.Tcell, eff, sp.t_coef)
     dat['Pclrsky']   = dat.totRad/1000 * sp.area * dat.eff
     dat['Pclrsky']   = np.minimum(dat.Pclrsky, sp.p_max)  # Cannot produce more than (inverter) maximum (kW)
+    dat['Pclrsky']   = np.maximum(dat.Pclrsky, 0)         # Cannot be negative (may happen briefly around sun rise/set
     
     return dat.Pclrsky
 
